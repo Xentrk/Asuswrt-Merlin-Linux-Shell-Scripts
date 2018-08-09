@@ -2,7 +2,7 @@
 ####################################################################################################
 # Written By: Xentrk
 # Name: x3mtek_Chk_ADNS.sh
-# Version 1.0
+# Version 1.1
 #
 # Description:
 #   Display WAN and OpenVPN Interfaces and their connectivity status
@@ -155,6 +155,21 @@ printf '\n'
 }
 listifaces
 
+warning_message () {        
+    printf 'Warning! Potential configuration conflict found with OpenVPN Client %s\n\n' "$OPENVPN_CLIENT"
+    printf '%bAccept DNS Configuration%b setting is set to %bExclusive%b\n' "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE"
+    printf 'When %bAccept DNS Configuration%b is set to %bExclusive%b and %bRedirect Internet Traffic%b is set to\n%bPolicy Rules%b or %bPolicy Rules (Strict)%b DNSMASQ is bypassed which will prevent AB-Solution from working\n' "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE"
+    printf '\n'
+    printf 'The work-around solution is to set %bAccept DNS Configuration%b to %bStrict%b AND\n' "$COLOR_GREEN" "$COLOR_WHITE"  "$COLOR_GREEN" "$COLOR_WHITE"
+    printf 'in the %bCustom Config Section%b add the entry: %bdhcp-option DNS dns.server.ip.address%b\n' "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE"
+    printf 'where %bdns.server.ip.address%b is a DNS server of your choice\n' "$COLOR_GREEN" "$COLOR_WHITE"
+    printf 'e.g. dhcp-option DNS 9.9.9.9\n' 
+    printf 'This will result in DNS leaking.  But it will allow AB-Solution to work over the VPN tunnel\n'
+    printf 'To learn more about the issue, see\n' 
+    printf '%bhttps://x3mtek.com/torguard-openvpn-2-4-client-setup-for-asuswrt-merlin-firmware/%b\n' "$COLOR_GREEN" "$COLOR_WHITE"
+    printf 'and navigate to the section %bDNSmasq and OpenVPN DNS%b\n\n' "$COLOR_GREEN" "$COLOR_WHITE"
+}
+
 if [ -d "/tmp/mnt/absolution" ]; then
     printf 'AB-Solution installation detected\n'
     printf 'Checking for potential conflicts with active OpenVPN Clients\n'
@@ -168,19 +183,10 @@ for OPENVPN_CLIENT in 1 2 3 4 5
     do
         if [ "$(nvram get vpn_client${OPENVPN_CLIENT}_state)" -ne "2" ]; then
             printf 'OpenVPN Client %s is not in a connected state. Skipping check for OpenVPN Client %s\n\n' "$OPENVPN_CLIENT" "$OPENVPN_CLIENT"
-        elif [ "$(nvram get vpn_client${OPENVPN_CLIENT}_state)" -eq "2" ] && [ "$(nvram get vpn_client${OPENVPN_CLIENT}_adns)" -eq "3" ] && [ "$(nvram get vpn_client${OPENVPN_CLIENT}_rgw)" -eq "3" ] || [ "$(nvram get vpn_client${OPENVPN_CLIENT}_rgw)" -eq "4" ]; then
-            printf 'Warning! Potential configuration conflict found with OpenVPN Client %s\n\n' "$OPENVPN_CLIENT"
-            printf '%bAccept DNS Configuration%b setting is set to %bExclusive%b\n' "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE"
-            printf 'When %bAccept DNS Configuration%b is set to %bExclusive%b and %bRedirect Internet Traffic%b is set to\n%bPolicy Rules%b or %bPolicy Rules (Strict)%b DNSMASQ is bypassed which will prevent AB-Solution from working\n' "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE"
-            printf '\n'
-            printf 'The work-around solution is to set %bAccept DNS Configuration%b to %bStrict%b AND\n' "$COLOR_GREEN" "$COLOR_WHITE"  "$COLOR_GREEN" "$COLOR_WHITE"
-            printf 'in the %bCustom Config Section%b add the entry: %bdhcp-option DNS dns.server.ip.address%b\n' "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE"
-            printf 'where %bdns.server.ip.address%b is a DNS server of your choice\n' "$COLOR_GREEN" "$COLOR_WHITE"
-            printf 'e.g. dhcp-option DNS 9.9.9.9\n' 
-            printf 'This will result in DNS leaking.  But it will allow AB-Solution to work over the VPN tunnel\n'
-            printf 'To learn more about the issue, see\n' 
-            printf '%bhttps://x3mtek.com/torguard-openvpn-2-4-client-setup-for-asuswrt-merlin-firmware/%b\n' "$COLOR_GREEN" "$COLOR_WHITE"
-            printf 'and navigate to the section %bDNSmasq and OpenVPN DNS%b\n\n' "$COLOR_GREEN" "$COLOR_WHITE"
+        elif [ "$(nvram get vpn_client${OPENVPN_CLIENT}_state)" -eq "2" ] && [ "$(nvram get vpn_client${OPENVPN_CLIENT}_adns)" -eq "3" ] && [ "$(nvram get vpn_client${OPENVPN_CLIENT}_rgw)" -eq "2" ] ; then
+            warning_message
+        elif [ "$(nvram get vpn_client${OPENVPN_CLIENT}_state)" -eq "2" ] && [ "$(nvram get vpn_client${OPENVPN_CLIENT}_adns)" -eq "3" ] && [ "$(nvram get vpn_client${OPENVPN_CLIENT}_rgw)" -eq "3" ] ; then
+            warning_message
         else
             printf 'Good news! No configuration conflicts found with OpenVPN Client %s\n\n' "$OPENVPN_CLIENT"
         fi    
