@@ -1,0 +1,228 @@
+# /jffs/scripts/profile.add
+
+# Directory Aliases go in this section
+#
+alias logdir='cd /opt/var/log'
+alias js='cd /jffs/scripts'
+alias jc='cd /jffs/configs'
+
+###########################################
+
+# short cut to list PREROUTING Chain
+# Usage: fwmarkstats
+alias fwmarkstats='iptables -nvL PREROUTING -t mangle --line'
+#############################################
+
+# List active LAN Clients from the command line
+# Usage: Clients
+Clients () {
+    GREEN='\033[0;32m'
+    RED='\033[0;31m'
+    NC='\033[0m' # No Color
+
+    printf '%b%-23s %-15s %-17s%b\n' "$GREEN" "Description         " "IP Address    " "MAC Address      "  "$NC"
+    arp -a | sed 's/(//;s/)//' | while read -r DESC IP AT MAC ETH ON IFACE
+    do
+        printf '%-23s %-15s %-17s\n' "$DESC" "$IP" "$MAC"
+    done
+}
+################################################
+
+# Check IP against ipset lists to see if it exists
+# Usage: MactchIP 111.222.333.444
+MatchIP() {
+  if [ -z "$1" ]; then
+    echo "Specify IP to check through ipset lists. Exiting."
+  else
+    GREEN='\033[0;32m'
+    RED='\033[0;31m'
+    NC='\033[0m' # No Color
+#    for TestList in $( (iptables -L -t raw && iptables -L) | grep "match-set" | tr -s ' ' | cut -d' ' -f7 | tr '\n' ' '); do
+    for SETLIST in $(ipset -L -n); do
+#    for
+      ipset -q test $SETLIST $1 && echo -e "$1 found in ${GREEN}${SETLIST}${NC}" || echo -e "$1 not found in ${RED}${SETLIST}${NC}"
+    done
+  fi
+}
+####################################################
+
+# List number of entries in each IPSET list
+# Usage: liststats
+liststats () {
+    GREEN='\033[0;32m'
+    RED='\033[0;31m'
+    NC='\033[0m' # No Color
+    true > /tmp/liststats
+    for SETLIST in $(ipset -L -n); do
+        printf '%s - %b%s%b\n' "$SETLIST" "$GREEN" "$(($(ipset -L "$SETLIST" | wc -l) - 8))" "$NC" >> /tmp/liststats
+    done
+    cat /tmp/liststats | sort
+    rm /tmp/liststats
+}
+
+listiface () {
+OVPNC1_ADDR=$(nvram get vpn_client1_addr)
+OVPNC1_DESC=$(nvram get vpn_client1_desc)
+OVPNC1_STATE=$(nvram get vpn_client1_state)
+case "$OVPNC1_STATE" in
+ 0) OVPNC1_STATE_DESC="Stopped" ;;
+ 1) OVPNC1_STATE_DESC="Connecting" ;;
+ 2) OVPNC1_STATE_DESC="Connected" ;;
+ *) OVPNC1_STATE_DESC="Unknown State" ;;
+esac
+
+OVPNC2_ADDR=$(nvram get vpn_client2_addr)
+OVPNC2_DESC=$(nvram get vpn_client2_desc)
+OVPNC2_STATE=$(nvram get vpn_client2_state)
+case "$OVPNC2_STATE" in
+ 0) OVPNC2_STATE_DESC="Stopped" ;;
+ 1) OVPNC2_STATE_DESC="Connecting" ;;
+ 2) OVPNC2_STATE_DESC="Connected" ;;
+ *) OVPNC2_STATE_DESC="Unknown State" ;;
+esac
+
+OVPNC3_ADDR=$(nvram get vpn_client3_addr)
+OVPNC3_DESC=$(nvram get vpn_client3_desc)
+OVPNC3_STATE=$(nvram get vpn_client3_state)
+case "$OVPNC3_STATE" in
+ 0) OVPNC3_STATE_DESC="Stopped" ;;
+ 1) OVPNC3_STATE_DESC="Connecting" ;;
+ 2) OVPNC3_STATE_DESC="Connected" ;;
+ *) OVPNC3_STATE_DESC="Unknown State" ;;
+esac
+
+OVPNC4_ADDR=$(nvram get vpn_client4_addr)
+OVPNC4_DESC=$(nvram get vpn_client4_desc)
+OVPNC4_STATE=$(nvram get vpn_client4_state)
+case "$(nvram get vpn_client4_state)" in
+ 0) OVPNC4_STATE_DESC="Stopped" ;;
+ 1) OVPNC4_STATE_DESC="Connecting" ;;
+ 2) OVPNC4_STATE_DESC="Connected" ;;
+ *) OVPNC4_STATE_DESC="Unknown State" ;;
+esac
+
+OVPNC5_ADDR=$(nvram get vpn_client5_addr)
+OVPNC5_DESC=$(nvram get vpn_client5_desc)
+OVPNC5_STATE=$(nvram get vpn_client5_state)
+case "$(nvram get vpn_client5_state)" in
+ 0) OVPNC5_STATE_DESC="Stopped" ;;
+ 1) OVPNC5_STATE_DESC="Connecting" ;;
+ 2) OVPNC5_STATE_DESC="Connected" ;;
+ *) OVPNC5_STATE_DESC="Unknown State" ;;
+esac
+
+WAN_IP=$(nvram get wan0_ipaddr)
+WAN_GW_IFNAME=$(nvram get wan0_gw_ifname)
+WAN_IFNAME=$(nvram get wan0_ifname)
+case "$(nvram get wan0_state_t)" in
+ 0) WAN0_STATE_DESC="Stopped" ;;
+ 1) WAN0_STATE_DESC="Connecting" ;;
+ 2) WAN0_STATE_DESC="Connected" ;;
+ *) WAN0_STATE_DESC="Unknown State" ;;
+esac
+case "$(nvram get wan1_state_t)" in
+ 0) WAN1_STATE_DESC="Stopped" ;;
+ 1) WAN1_STATE_DESC="Connecting..." ;;
+ 2) WAN1_STATE_DESC="Connected" ;;
+ *) WAN1_STATE_DESC="Unknown State" ;;
+esac
+
+
+printf '\n'
+printf '******************************************************************************\n'
+printf '*                            WAN Interfaces                                  *\n'
+printf '******************************************************************************\n'
+printf '%-6s %-9s %-15s %-4s %-6s\n' "WAN IF " "Status" "Address" "GW" "IFNAME"
+printf '%-6s %-9s %-15s %-4s %-6s\n' "------ " "---------" "---------------" "----" "------"
+printf '%-6s %-9s %-15s %-4s %-6s\n' "WAN0:  " ${WAN0_STATE_DESC} $(nvram get wan0_ipaddr) $(nvram get wan0_gw_ifname) $(nvram get wan0_ifname)
+printf '%-6s %-9s %-15s %-4s %-6s\n' "WAN1:  " ${WAN1_STATE_DESC} $(nvram get wan1_ipaddr) $(nvram get wan1_gw_ifname) $(nvram get wan1_ifname)
+#printf '%-11s %-9s %-7s %-9s %-7s %-4s %-11s %-4s\n' "WAN Status:" ${WAN_STATE_DESC} "WAN IP:" $(nvram get wan0_ipaddr) "WAN GW:" $(nvram get wan0_gw_ifname) "WAN IFNAME:" $(nvram get wan0_ifname)
+printf '******************************************************************************\n'
+printf '\n'
+printf '******************************************************************************\n'
+printf '*                            VPN Interfaces                                  *\n'
+printf '******************************************************************************\n'
+printf '%-7s %-13s %-35s %-24s\n' "Client" "Status" "Address" "Description"
+printf '%-7s %-13s %-35s %-24s\n' "-------" "---------" "-----------------------------------" "------------------------"
+printf '%-7s %-13s %-35s %-24s\n' "OVPNC1:" ${OVPNC1_STATE_DESC} "${OVPNC1_ADDR:-" "}" "${OVPNC1_DESC}"
+printf '%-7s %-13s %-35s %-24s\n' "OVPNC2:" ${OVPNC2_STATE_DESC} "${OVPNC2_ADDR:-" "}" "${OVPNC2_DESC}"
+printf '%-7s %-13s %-35s %-24s\n' "OVPNC3:" ${OVPNC3_STATE_DESC} "${OVPNC3_ADDR:-" "}" "${OVPNC3_DESC}"
+printf '%-7s %-13s %-35s %-24s\n' "OVPNC4:" ${OVPNC4_STATE_DESC} "${OVPNC4_ADDR:-" "}" "${OVPNC4_DESC}"
+printf '%-7s %-13s %-35s %-24s\n' "OVPNC5:" ${OVPNC5_STATE_DESC} "${OVPNC5_ADDR:-" "}" "${OVPNC5_DESC}"
+printf '\n'
+}
+
+purge_routes () {
+# WAN
+    ip rule del fwmark 0x7000/0x7000 > /dev/null 2>&1
+
+#VPN Client 1
+    ip rule del fwmark 0x1000/0x1000 > /dev/null 2>&1
+
+#VPN Client 2
+    ip rule del fwmark 0x2000/0x2000 > /dev/null 2>&1
+
+#VPN Client 3
+    ip rule del fwmark 0x3000/0x3000 > /dev/null 2>&1
+
+#VPN Client 4
+    ip rule del fwmark 0x4000/0x4000 > /dev/null 2>&1
+
+#VPN Client 5
+    ip rule del fwmark 0x5000/0x5000 > /dev/null 2>&1
+
+    ip route flush cache
+
+    ip rule | grep -E "([0-9]{1,3}[\.]){3}[0-9]{1,3}" | grep ovpnc > /tmp/temp.$$
+    ip rule | grep -E "([0-9]{1,3}[\.]){3}[0-9]{1,3}" | grep main | grep all >> /tmp/temp.$$
+    if [ -s "/tmp/temp.$$" ]; then
+        create_remove_routes_script
+    else
+        rm "/tmp/temp.$$" 2>/dev/null
+    fi
+}
+
+create_remove_routes_script () {
+    awk 'BEGIN{
+    FS=" ";
+    }
+    {
+        if (NF == 7) {
+		        if ($7 == "ovpnc1") {
+                table_no = "111";
+      } else if ($7 == "ovpnc2") {
+            table_no = "112";
+      } else if ($7 == "ovpnc3") {
+            table_no = "113";
+      } else if ($7 == "ovpnc4") {
+            table_no = "114";
+      } else if ($7 == "ovpnc5") {
+            table_no = "115";
+      } else if ($7 == "main") {
+            table_no = "254";
+      }
+      printf("ip rule del to %s table %s\n", $5, table_no ) >> "/tmp/remove_routes.sh";
+	    } else if (NF == 5) {
+ 		        if ($5 == "ovpnc1") {
+                table_no = "111";
+          } else if ($5 == "ovpnc2") {
+                table_no = "112";
+          } else if ($5 == "ovpnc3") {
+                table_no = "113";
+          } else if ($5 == "ovpnc4") {
+                table_no = "114";
+          } else if ($5 == "ovpnc5") {
+                table_no = "115";
+          } else if ($5 == "main") {
+                table_no = "254";
+          }
+          printf("ip rule del from %s table %s%s\n", $3, table_no ) >> "/tmp/remove_routes.sh";
+	    }
+    }
+END{}' "/tmp/temp.$$"
+
+sed -i '1i#!/bin/sh' "/tmp/remove_routes.sh"
+
+# Run script to purge any existing routes and delete temp files
+sh /tmp/remove_routes.sh && rm /tmp/remove_routes.sh && rm "/tmp/temp.$$"
+}
