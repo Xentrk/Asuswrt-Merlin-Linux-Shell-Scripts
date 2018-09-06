@@ -7,7 +7,7 @@ The repository includes the following scripts:
 
 **x3mtek_Chk_ADNS**
 
-More scripts will added in the future.
+More scripts will be added in the future.
 
 ### profile.add
 profile.add adds environment variables when a user logs in over an SSH session.  This is a good location for custom commands or short cuts that you can run from an SSH command line.
