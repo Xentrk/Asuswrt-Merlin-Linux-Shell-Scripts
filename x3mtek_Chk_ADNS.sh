@@ -155,7 +155,7 @@ printf '\n'
 }
 listifaces
 
-if [ -d "/tmp/mnt/absolution" ]; then
+if [ -d "/opt/share/diversion" ]; then
     printf 'Diversion installation detected\n'
     printf 'Checking for potential conflicts with active OpenVPN Clients\n'
     printf '\n'
