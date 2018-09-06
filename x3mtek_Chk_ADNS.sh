@@ -2,14 +2,14 @@
 ####################################################################################################
 # Written By: Xentrk
 # Name: x3mtek_Chk_ADNS.sh
-# Version 1.2
+# Version 1.3
 #
 # Description:
-#   Display WAN and OpenVPN Interfaces and their connectivity status
-#   Determine if the router uses Diversion.  If so, examine OpenVPN client settings
-#   If Accept DNS Exclusive set to Exlusive and Redirect Internet Traffic is set to Policy Rules or
-#   Policy Rules (Strict), intruct user that Diversion will not work over the VPN tunnel and 
-#   provide instructios for work-around solution.
+# Display WAN and OpenVPN Interfaces and their connectivity status. In addition, the script will check if the  # router uses the ad blocking software called Diversion. If Diversion is installed, the script will examine the # Accept DNS Configuration OpenVPN client setting for active OpenVPN clients.
+#
+# If Accept DNS Exclusive is set to Exlusive and Redirect Internet Traffic is set to Policy Rules or Policy
+# Rules (Strict), instruct the user that Diversion will not work over the VPN tunnel and provide instructions
+# for the work-around solution.
 #
 ####################################################################################################
 # Uncomment the line below for debugging
@@ -130,7 +130,7 @@ case "$(nvram get wan1_state_t)" in
 esac
 
 
-printf '\n' 
+printf '\n'
 printf '********************************************************************************************\n'
 printf '*                                   WAN Interfaces                                         *\n'
 printf '********************************************************************************************\n'
@@ -138,7 +138,7 @@ printf '%-6s %-13s %-15s %-4s %-6s\n' "WAN IF " "Status" "Address" "GW" "IFNAME"
 printf '%-6s %-13s %-15s %-4s %-6s\n' "------ " "-------------" "---------------" "----" "------"
 printf '%-6s %-13s %-15s %-4s %-6s\n' "WAN0:  " "$WAN0_STATE_DESC" "$(nvram get wan0_ipaddr)" "$(nvram get wan0_gw_ifname)" "$(nvram get wan0_ifname)"
 printf '%-6s %-13s %-15s %-4s %-6s\n' "WAN1:  " "$WAN1_STATE_DESC" "$(nvram get wan1_ipaddr)" "$(nvram get wan1_gw_ifname)" "$(nvram get wan1_ifname)"
-printf '\n' 
+printf '\n'
 printf '********************************************************************************************\n'
 printf '*                                   VPN Interfaces                                         *\n'
 printf '********************************************************************************************\n'
@@ -161,9 +161,9 @@ if [ -d "/opt/share/diversion" ]; then
     printf '\n'
 
 # For clients that are in a connected state, see if ADNS=3 (Exclusive)
-# If Accept DNS Cofiguration = "Exclusive", give warning message about DNSMASQ 
-# being bypassed which prevents Diversion from working  
-  
+# If Accept DNS Cofiguration = "Exclusive", give warning message about DNSMASQ
+# being bypassed which prevents Diversion from working
+
 for OPENVPN_CLIENT in 1 2 3 4 5
     do
         if [ "$(nvram get vpn_client${OPENVPN_CLIENT}_state)" -ne "2" ]; then
@@ -176,13 +176,13 @@ for OPENVPN_CLIENT in 1 2 3 4 5
             printf 'The work-around solution is to set %bAccept DNS Configuration%b to %bStrict%b AND\n' "$COLOR_GREEN" "$COLOR_WHITE"  "$COLOR_GREEN" "$COLOR_WHITE"
             printf 'in the %bCustom Config Section%b add the entry: %bdhcp-option DNS dns.server.ip.address%b\n' "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE"
             printf 'where %bdns.server.ip.address%b is a DNS server of your choice\n' "$COLOR_GREEN" "$COLOR_WHITE"
-            printf 'e.g. dhcp-option DNS 9.9.9.9\n' 
+            printf 'e.g. dhcp-option DNS 9.9.9.9\n'
             printf 'This will result in DNS leaking.  But it will allow Diversion to work over the VPN tunnel\n'
-            printf 'To learn more about the issue, see\n' 
+            printf 'To learn more about the issue, see\n'
             printf '%bhttps://x3mtek.com/torguard-openvpn-2-4-client-setup-for-asuswrt-merlin-firmware/%b\n' "$COLOR_GREEN" "$COLOR_WHITE"
             printf 'and navigate to the section %bDNSmasq and OpenVPN DNS%b\n\n' "$COLOR_GREEN" "$COLOR_WHITE"
         else
             printf 'Good news! No configuration conflicts found with OpenVPN Client %s\n\n' "$OPENVPN_CLIENT"
-        fi    
-    done                              
-fi    
+        fi
+    done
+fi
