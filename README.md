@@ -9,7 +9,7 @@ The repository includes the following scripts:
 
 More scripts will added in the future.
 
-#### profile.add
+### profile.add
 profile.add adds environment variables when a user logs in over an SSH session.  This is a good location for custom commands or short cuts that you can run from an SSH command line.
 
 ##### Short Cuts
@@ -35,7 +35,7 @@ listiface - List status of WAN and OpenVPN interfaces
 
 purge_routes - Purge OpenVPN and ip rule routes
 ```
-#### x3mtek_Chk_ADNS.sh
+### x3mtek_Chk_ADNS.sh
 
 Display WAN and OpenVPN Interfaces and their connectivity status.  In addition, the script will check if the router uses the ad blocking software called [Diversion](https://diversion.ch).  If Diversion is installed, the script will examine the Accept DNS Configuration OpenVPN client setting for active OpenVPN clients.
 
