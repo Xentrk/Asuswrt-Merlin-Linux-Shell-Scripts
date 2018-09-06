@@ -10,7 +10,7 @@ The repository includes the following scripts:
 More scripts will added in the future.
 
 #### profile.add
-profile.add adds environment variables when a user logs in over an SSH session.  This is a good place to place create custom commands or short cuts that you can run from an SSH command line.
+profile.add adds environment variables when a user logs in over an SSH session.  This is a good location for custom commands or short cuts that you can run from an SSH command line.
 
 ##### Short Cuts
 ```
