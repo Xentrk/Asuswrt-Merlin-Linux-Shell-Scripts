@@ -121,7 +121,7 @@ Menu_DHCP_Staticlist() {
       ;;
     7)
       Save_DHCP_Staticlist
-      nvram unset dhcp_static_x
+      nvram set dhcp_staticlist=""
       nvram commit
       echo
       echo "Press enter to continue"
