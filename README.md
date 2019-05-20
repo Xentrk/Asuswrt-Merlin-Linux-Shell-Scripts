@@ -52,11 +52,11 @@ Helpful utility to:
 
 1. Save dhcp_staticlist nvram values to /opt/tmp/dhcp_staticlist.txt. This will allow you to restore the values after performing a factory reset.
 
-2. Restore dhcp_staticlist nvram values from /opt/tmp/dhcp_staticlist.txt after a factory reset
+2. Restore dhcp_staticlist nvram values from /opt/tmp/dhcp_staticlist.txt
 
-3. Preview current nvram dhcp static list in dnsmasq.conf format
+3. Preview nvram dhcp_staticlist in dnsmasq.conf format
 
-4. Append Output DHCP Static List to /jffs/configs/dnsmasq.conf.add & Disable Manual Assignment in the WAN GUI. You will then be prompted to reboot the router to have the settings take effect.
+4. Append output of dhcp_staticlist to /jffs/configs/dnsmasq.conf.add in dnsmasq format and disable **Manual Assignment** in the WAN GUI. You will then be prompted to reboot the router to have the settings take effect.
 
 5. Disable DHCP Manual Assignment
 
