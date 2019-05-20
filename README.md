@@ -50,7 +50,7 @@ If **Accept DNS Exclusive** is set to **Exclusive** and **Redirect Internet Traf
 
 Helpful utility to:
 
-1. Save dhcp_staticlist nvram values to /opt/tmp/dhcp_staticlist.txt. This will allow you to restore the values after performing a factory reset.
+1. Save dhcp_staticlist nvram values to **/opt/tmp/dhcp_staticlist.txt**. This will allow you to restore the values after performing a factory reset.
 
 2. Restore dhcp_staticlist nvram values from **/opt/tmp/dhcp_staticlist.txt**
 
