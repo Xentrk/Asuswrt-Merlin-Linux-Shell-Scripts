@@ -41,9 +41,9 @@ Displays WAN and OpenVPN Interfaces and their connectivity status.  In addition,
 If **Accept DNS Exclusive** is set to **Exclusive** and **Redirect Internet Traffic** is set to **Policy Rules** or
 **Policy Rules (Strict)**, instruct the user that Diversion will not work over the VPN tunnel and provide instructions for the work-around solution.
 
-### ChK_ADNS.sh Installation
+### Chk_ADNS.sh Installation
 ````
-/usr/sbin/curl --retry 3 "https://raw.githubusercontent.com/Xentrk/Asuswrt-Merlin-Linux-Shell-Scripts/master/ChK_ADNS.sh" -o "/jffs/scripts/ChK_ADNS.sh" && chmod 755 /jffs/scripts/ChK_ADNS.sh && sh /jffs/scripts/ChK_ADNS.sh
+/usr/sbin/curl --retry 3 "https://raw.githubusercontent.com/Xentrk/Asuswrt-Merlin-Linux-Shell-Scripts/master/Chk_ADNS.sh" -o "/jffs/scripts/Chk_ADNS.sh" && chmod 755 /jffs/scripts/Chk_ADNS.sh && sh /jffs/scripts/Chk_ADNS.sh
 ````
 
 # dhcpstaticlist.sh
