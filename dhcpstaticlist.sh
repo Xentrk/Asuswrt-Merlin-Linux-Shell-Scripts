@@ -14,6 +14,7 @@
 #  5) Disable DHCP Manual Assignment
 #  6) Enable DHCP Manual Assignment
 #  7) Save nvram dhcp_staticlist to /opt/tmp/dhcp_staticlist.txt and clear the DHCP Manual Assignment nvram values from dhcp_staticlist
+#  8) Display the character count of dhcp_staticlist
 #
 ####################################################################################################
 
@@ -37,6 +38,7 @@ Menu_DHCP_Staticlist() {
     printf '%b[5]%b - Disable Manual Assignment\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[6]%b - Enable Manual Assignment\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[7]%b - Save nvram dhcp_staticlist to /opt/tmp/dhcp_staticlist.txt and clear dhcp_staticlist\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
+    printf '%b[8]%b - Display character size of dhcp_staticlist (2999 is the limit)\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[e]%b - Exit\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     echo
     printf "==> "
@@ -121,6 +123,16 @@ Menu_DHCP_Staticlist() {
       Save_DHCP_Staticlist
       nvram unset dhcp_static_x
       nvram commit
+      echo
+      echo "Press enter to continue"
+      read -r
+      Menu_DHCP_Staticlist
+      break
+      ;;
+    8)
+      word_count=$(nvram get dhcp_staticlist | wc -m)
+      echo
+      echo "The current character size of dhcp_staticlist is: $word_count"
       echo
       echo "Press enter to continue"
       read -r
