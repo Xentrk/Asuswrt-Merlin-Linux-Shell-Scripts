@@ -70,7 +70,7 @@ dhcp-host=94:C9:B2:5D:F5:04,D-Link_Switch,192.168.2.201,1440
 
 2. Restore dhcp_staticlist nvram values from **/opt/tmp/dhcp_staticlist.txt**
 
-3. Preview nvram dhcp_staticlist in dnsmasq.conf format
+3. Preview nvram dhcp_staticlist in dnsmasq format
 
 4. Append output of dhcp_staticlist to **/jffs/configs/dnsmasq.conf.add** in dnsmasq format and disable **Manual Assignment** in the WAN GUI. You will then be prompted to reboot the router to have the settings take effect.
 
