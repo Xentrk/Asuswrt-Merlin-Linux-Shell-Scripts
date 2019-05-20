@@ -62,7 +62,7 @@ Helpful utility to:
 
 6. Enable DHCP Manual Assignment in the WAN GUI
 
-7. Save nvram dhcp_staticlist to **/opt/tmp/dhcp_staticlist.txt** and clear the DHCP Manual Assignment nvram values from dhcp_staticlist
+7. Save nvram dhcp_staticlist to **/opt/tmp/dhcp_staticlist.txt** and delete the DHCP Manual Assignment nvram values from dhcp_staticlist
 
 ### dhcpstaticlist.sh Installation
 ````
