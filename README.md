@@ -5,7 +5,6 @@ Miscellaneous Linux Shell Scripts developed for Asuswrt-Merlin firmware
 
 profile.add adds environment variables when a user logs in over an SSH session.  This is a good place to create command line short cuts or custom commands that you can run from an SSH command line.
 
-#### Command Line Short Cuts
 ```
 logdir - cd /opt/var/log
 
