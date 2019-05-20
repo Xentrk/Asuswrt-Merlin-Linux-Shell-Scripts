@@ -34,7 +34,7 @@ purge_routes - Purge OpenVPN and ip rule routes
 ````
 You must open up a new SSH session to run the commands.
 
-# x3mtek_Chk_ADNS.sh
+# Chk_ADNS.sh
 
 Displays WAN and OpenVPN Interfaces and their connectivity status.  In addition, the script will check if the router uses the ad blocking software called [Diversion](https://diversion.ch). If Diversion is installed, the script will examine the **Accept DNS Configuration** OpenVPN client setting for active OpenVPN clients.
 
