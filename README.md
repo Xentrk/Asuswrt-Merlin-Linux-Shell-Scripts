@@ -58,9 +58,9 @@ Helpful utility to:
 
 4. Append output of dhcp_staticlist to **/jffs/configs/dnsmasq.conf.add** in dnsmasq format and disable **Manual Assignment** in the WAN GUI. You will then be prompted to reboot the router to have the settings take effect.
 
-5. Disable DHCP Manual Assignment in the WAN GUI
+5. Disable DHCP Manual Assignment in the LAN GUI
 
-6. Enable DHCP Manual Assignment in the WAN GUI
+6. Enable DHCP Manual Assignment in the LAN GUI
 
 7. Save nvram dhcp_staticlist to **/opt/tmp/dhcp_staticlist.txt** and delete the DHCP Manual Assignment nvram values from dhcp_staticlist
 
