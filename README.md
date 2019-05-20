@@ -80,6 +80,8 @@ dhcp-host=94:C9:B2:5D:F5:04,D-Link_Switch,192.168.2.201,1440
 
 7. Save nvram dhcp_staticlist to **/opt/tmp/dhcp_staticlist.txt** and delete the DHCP Manual Assignment nvram values from dhcp_staticlist
 
+8. Display the character count of dhcp_staticlist.
+
 ### dhcpstaticlist.sh Installation
 ````
 /usr/sbin/curl --retry 3 "https://raw.githubusercontent.com/Xentrk/Asuswrt-Merlin-Linux-Shell-Scripts/master/dhcpstaticlist.sh" -o "/jffs/scripts/dhcpstaticlist.sh" && chmod 755 /jffs/scripts/dhcpstaticlist.sh && sh /jffs/scripts/dhcpstaticlist.sh
