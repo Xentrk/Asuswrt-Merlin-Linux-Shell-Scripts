@@ -68,17 +68,17 @@ dhcp-host=94:C9:B2:5D:F5:04,D-Link_Switch,192.168.2.201,1440
 
 1. Save dhcp_staticlist nvram values to **/opt/tmp/dhcp_staticlist.txt**. This will allow you to restore the values after performing a factory reset.
 
-2. Restore dhcp_staticlist nvram values from **/opt/tmp/dhcp_staticlist.txt**
+2. Restore dhcp_staticlist nvram values from **/opt/tmp/dhcp_staticlist.txt**.
 
-3. Preview nvram dhcp_staticlist in dnsmasq format
+3. Preview nvram dhcp_staticlist in dnsmasq format.
 
 4. Append output of dhcp_staticlist to **/jffs/configs/dnsmasq.conf.add** in dnsmasq format and disable **Manual Assignment** in the WAN GUI. You will then be prompted to reboot the router to have the settings take effect.
 
-5. Disable DHCP Manual Assignment in the LAN GUI
+5. Disable DHCP Manual Assignment in the LAN GUI.
 
-6. Enable DHCP Manual Assignment in the LAN GUI
+6. Enable DHCP Manual Assignment in the LAN GUI.
 
-7. Save nvram dhcp_staticlist to **/opt/tmp/dhcp_staticlist.txt** and delete the DHCP Manual Assignment nvram values from dhcp_staticlist
+7. Save nvram dhcp_staticlist to **/opt/tmp/dhcp_staticlist.txt** and delete the DHCP Manual Assignment nvram values from dhcp_staticlist.
 
 8. Display the character count of dhcp_staticlist.
 
