@@ -132,7 +132,7 @@ Menu_DHCP_Staticlist() {
       ;;
     8)
       word_count=$(nvram get dhcp_staticlist | wc -m)
-      # wc appears to count return or extra line?
+      # wc appears to count line return or extra line?
       word_count=$((word_count - 1))
       echo
       echo "The current character size of dhcp_staticlist is: $word_count"
