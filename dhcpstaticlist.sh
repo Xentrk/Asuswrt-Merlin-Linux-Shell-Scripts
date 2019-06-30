@@ -2,8 +2,8 @@
 ####################################################################################################
 # Script: dhcpstaticlist.sh
 # Original Author: Xentrk
-# Last Updated Date: 20-May-2019
-# Version 1.0.0
+# Last Updated Date: 30-June-2019
+# Version 1.0.1
 #
 # Description:
 #  Helpful utility to
@@ -30,7 +30,7 @@ Menu_DHCP_Staticlist() {
   clear
 
   while true; do
-    printf '\n\nUse this utility to save or restore dhcp static list nvram values\n\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
+    printf '\n\nUse this utility to save or restore dhcp static list nvram values\n\n'
     printf '%b[1]%b - Save nvram dhcp static list to /opt/tmp/dhcp_staticlist.txt\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[2]%b - Restore nvram dhcp static list from /opt/tmp/dhcp_staticlist.txt\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[3]%b - Preview DHCP Static List in dnsmasq format\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
@@ -42,9 +42,9 @@ Menu_DHCP_Staticlist() {
     printf '%b[e]%b - Exit\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     echo
     printf "==> "
-    read -r "menu_update_current_installation"
+    read -r option
     echo
-    case "$menu_update_current_installation" in
+    case "$option" in
     1)
       Save_DHCP_Staticlist
       echo
@@ -132,6 +132,8 @@ Menu_DHCP_Staticlist() {
       ;;
     8)
       word_count=$(nvram get dhcp_staticlist | wc -m)
+      # wc appears to count return or extra line?
+      word_count=$((word_count - 1))
       echo
       echo "The current character size of dhcp_staticlist is: $word_count"
       echo
@@ -145,7 +147,7 @@ Menu_DHCP_Staticlist() {
       exit 0
       ;;
     *)
-      echo "[*] $menu_update_installer Isn't An Option!"
+      printf '\n\nOption choice %b%s%b is not a valid option!\n\n' "${COLOR_GREEN}" "$option" "${COLOR_WHITE}"
       ;;
     esac
   done
@@ -179,9 +181,9 @@ Save_DHCP_Staticlist() {
 
 Restore_DHCP_Staticlist() {
 
-  nvram set dhcp_staticlist="$(cat $FILE)"
+  nvram set dhcp_staticlist="$(cat "$FILE")"
   nvram commit
-  if [ -n $(nvram get dhcp_staticlist >/dev/null 2>&1) ]; then
+  if [ -n "$(nvram get dhcp_staticlist >/dev/null 2>&1)" ]; then
     echo "dhcp_staticlist successfully restored"
   else
     echo "Unknown error occurred trying to restore dhcp_staticlist"
