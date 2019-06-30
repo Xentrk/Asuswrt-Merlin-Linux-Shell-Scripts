@@ -147,7 +147,11 @@ Menu_DHCP_Staticlist() {
       exit 0
       ;;
     *)
-      printf '\n\nOption choice %b%s%b is not a valid option!\n\n' "${COLOR_GREEN}" "$option" "${COLOR_WHITE}"
+      printf '\nOption choice %b%s%b is not a valid option!\n' "${COLOR_GREEN}" "$option" "${COLOR_WHITE}"
+      echo
+      echo "Press enter to continue"
+      read -r
+      Menu_DHCP_Staticlist
       ;;
     esac
   done
