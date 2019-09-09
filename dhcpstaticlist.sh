@@ -127,6 +127,7 @@ Menu_DHCP_Staticlist() {
       Save_DHCP_Staticlist
       Save_DHCP_Hostnames
       nvram unset dhcp_staticlist
+      nvram unset dhcp_hostnames
       nvram set dhcp_static_x=0
       nvram commit
       echo
@@ -198,9 +199,10 @@ Save_DHCP_Hostnames() {
 
 Restore_DHCP_Staticlist() {
 
-  nvram set dhcp_staticlist="$(cat "$DHCP_STATICLIST")"
+  nvram set dhcp_staticlist="$(cat /opt/tmp/dhcp_staticlist.txt)"
   nvram commit
-  if [ -n "$(nvram get dhcp_staticlist >/dev/null 2>&1)" ]; then
+  sleep 1
+  if [ -n "$(nvram get dhcp_staticlist)" ]; then
     echo "dhcp_staticlist successfully restored"
   else
     echo "Unknown error occurred trying to restore dhcp_staticlist"
@@ -209,9 +211,10 @@ Restore_DHCP_Staticlist() {
 
 Restore_DHCP_Hostnames() {
 
-  nvram set dhcp_hostnames="$(cat "$DHCP_HOSTNAMES")"
+  nvram set dhcp_hostnames="$(cat /opt/tmp/dhcp_hostnames.txt)"
   nvram commit
-  if [ -n "$(nvram get dhcp_hostnames >/dev/null 2>&1)" ]; then
+  sleep 1
+  if [ -n "$(nvram get dhcp_hostnames)" ]; then
     echo "dhcp_hostnames successfully restored"
   else
     echo "Unknown error occurred trying to restore dhcp_hostnames"
