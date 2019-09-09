@@ -32,13 +32,13 @@ Menu_DHCP_Staticlist() {
 
   while true; do
     printf '\n\nUse this utility to save or restore dhcp static list nvram values\n\n'
-    printf '%b[1]%b - Save nvram dhcp static list to /opt/tmp/dhcp_staticlist.txt\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
-    printf '%b[2]%b - Restore nvram dhcp static list from /opt/tmp/dhcp_staticlist.txt\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
+    printf '%b[1]%b - Save nvram dhcp_staticlist and dhcp_hostnames to /opt/tmp/\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
+    printf '%b[2]%b - Restore nvram dhcp_staticlist and dhcp_hostnames from /opt/tmp/\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[3]%b - Preview DHCP Static List in dnsmasq format\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[4]%b - Append DHCP Static List to dnsmasq.conf.add & Disable DHCP Manual Assignment\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[5]%b - Disable DHCP Manual Assignment\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[6]%b - Enable DHCP Manual Assignment\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
-    printf '%b[7]%b - Backup nvram dhcp_staticlist to /opt/tmp/dhcp_staticlist.txt and dhcp_hostnames to /opt/tmp/dhcp_hostnames.txt and clear nvram values\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
+    printf '%b[7]%b - Backup nvram dhcp_staticlist and dhcp_hostnames to /opt/tmp/ and clear nvram values\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[8]%b - Display character size of dhcp_staticlist (2999 is the limit)\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[e]%b - Exit\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     echo
@@ -74,6 +74,7 @@ Menu_DHCP_Staticlist() {
       ;;
     4)
       printf '\n' #add return in case no blank line exists at end of file
+      echo " " >>/jffs/configs/dnsmasq.conf.add
       Save_Dnsmasq_Format >>/jffs/configs/dnsmasq.conf.add
       nvram set dhcp_static_x=0
       nvram commit
