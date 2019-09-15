@@ -66,7 +66,7 @@ dhcp-host=94:C9:B2:5D:F5:04,D-Link_Switch,192.168.2.201,1440
 
 **dhcpstaticlist.sh** is a helpful utility script to manage DHCP static leases. The script displays a menu with the following functions:
 
-1. Save dhcp_staticlist nvram values to **/opt/tmp/dhcp_staticlist.txt**. This will allow you to restore the values after performing a factory reset.
+1. Save dhcp_staticlist nvram values to /opt/tmp/dhcp_staticlist.txt. This will allow you to restore the values after performing a factory reset.
 
 2. Restore dhcp_staticlist nvram values from **/opt/tmp/dhcp_staticlist.txt**.
 

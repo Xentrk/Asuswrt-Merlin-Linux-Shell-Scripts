@@ -8,14 +8,14 @@
 #
 # Description:
 #  Helpful utility to
-#  1) Save dhcp_staticlist nvram values to /opt/tmp/dhcp_staticlist.txt. This will allow you to restore the values after performing a factory reset.
-#  2) Restore dhcp_staticlist nvram values from /opt/tmp/dhcp_staticlist.txt after a factory reset
-#  3) Preview current nvram dhcp static list in dnsmasq.conf format
+#  1) Save nvram dhcp_staticlist and dhcp_hostnames to /opt/tmp. This will allow you to restore the values after performing a factory reset.
+#  2) Restore nvram dhcp_staticlist and dhcp_hostnames from /opt/tmp/.
+#  3) PPreview dhcp_staticlist and dhcp_hostnames in dnsmasq format
 #  4) Append Output DHCP Static List to /jffs/configs/dnsmasq.conf.add & Disable Manual Assignment in the WAN GUI. You will then be prompted to reboot the router to have the settings take effect.
 #  5) Disable DHCP Manual Assignment
 #  6) Enable DHCP Manual Assignment
-#  7) Save nvram dhcp_staticlist to /opt/tmp/dhcp_staticlist.txt and clear the DHCP Manual Assignment nvram values from dhcp_staticlist
-#  8) Display the character count of dhcp_staticlist
+#  7) Backup nvram dhcp_staticlist and dhcp_hostnames to /opt/tmp/ and clear nvram values.
+#  8) Display character size of dhcp_staticlist and dhcp_hostnames
 #
 ####################################################################################################
 
@@ -32,15 +32,15 @@ Menu_DHCP_Staticlist() {
   clear
 
   while true; do
-    printf '\n\nUse this utility to save or restore dhcp static list nvram values\n\n'
+    printf '\n\nUse this utility to save or restore dhcp_staticlist and dhcp_hostnames nvram values\n\n'
     printf '%b[1]%b - Save nvram dhcp_staticlist and dhcp_hostnames to /opt/tmp/\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[2]%b - Restore nvram dhcp_staticlist and dhcp_hostnames from /opt/tmp/\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
-    printf '%b[3]%b - Preview DHCP Static List in dnsmasq format\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
-    printf '%b[4]%b - Append DHCP Static List to dnsmasq.conf.add & Disable DHCP Manual Assignment\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
+    printf '%b[3]%b - Preview dhcp_staticlist and dhcp_hostnames in dnsmasq format\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
+    printf '%b[4]%b - Append dhcp_staticlist and dhcp_hostnames to dnsmasq.conf.add & Disable DHCP Manual Assignment\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[5]%b - Disable DHCP Manual Assignment\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[6]%b - Enable DHCP Manual Assignment\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[7]%b - Backup nvram dhcp_staticlist and dhcp_hostnames to /opt/tmp/ and clear nvram values\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
-    printf '%b[8]%b - Display character size of dhcp_staticlist (2999 is the limit)\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
+    printf '%b[8]%b - Display character size of dhcp_staticlist and dhcp_hostnames (2999 is the limit)\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[e]%b - Exit\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     echo
     printf "==> "
@@ -143,6 +143,11 @@ Menu_DHCP_Staticlist() {
       word_count=$((word_count - 1))
       echo
       echo "The current character size of dhcp_staticlist is: $word_count"
+      echo
+      word_count=$(nvram get dhcp_hostnames | wc -m)
+      # wc appears to count line return or extra line?
+      word_count=$((word_count - 1))
+      echo "The current character size of dhcp_hostnames is: $word_count"
       echo
       echo "Press enter to continue"
       read -r
