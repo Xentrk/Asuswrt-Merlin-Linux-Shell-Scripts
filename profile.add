@@ -21,7 +21,7 @@ Clients () {
     NC='\033[0m' # No Color
 
     printf '%b%-23s %-15s %-17s%b\n' "$GREEN" "Description         " "IP Address    " "MAC Address      "  "$NC"
-    arp -a | sed 's/(//;s/)//' | while read -r DESC IP AT MAC ETH ON IFACE
+    arp | sed 's/(//;s/)//' | while read -r DESC IP AT MAC ETH ON IFACE
     do
         printf '%-23s %-15s %-17s\n' "$DESC" "$IP" "$MAC"
     done
