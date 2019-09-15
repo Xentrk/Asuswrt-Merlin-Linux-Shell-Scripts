@@ -66,21 +66,21 @@ dhcp-host=94:C9:B2:5D:F5:04,D-Link_Switch,192.168.2.201,1440
 
 **dhcpstaticlist.sh** is a helpful utility script to manage DHCP static leases. The script displays a menu with the following functions:
 
-1. Save dhcp_staticlist nvram values to /opt/tmp/dhcp_staticlist.txt. This will allow you to restore the values after performing a factory reset.
+1. Save nvram dhcp_staticlist and dhcp_hostnames to /opt/tmp. This will allow you to restore the values after performing a factory reset.
 
-2. Restore dhcp_staticlist nvram values from **/opt/tmp/dhcp_staticlist.txt**.
+2. Restore nvram dhcp_staticlist and dhcp_hostnames from /opt/tmp/.
 
-3. Preview nvram dhcp_staticlist in dnsmasq format.
+3. Preview dhcp_staticlist and dhcp_hostnames in dnsmasq format.
 
-4. Append output of dhcp_staticlist to **/jffs/configs/dnsmasq.conf.add** in dnsmasq format and disable **Manual Assignment** in the WAN GUI. You will then be prompted to reboot the router to have the settings take effect.
+4. Append Output DHCP Static List to /jffs/configs/dnsmasq.conf.add & Disable Manual Assignment in the WAN GUI. You will then be prompted to reboot the router to have the settings take effect.
 
-5. Disable DHCP Manual Assignment in the LAN GUI.
+5. Disable DHCP Manual Assignment.
 
-6. Enable DHCP Manual Assignment in the LAN GUI.
+6. Enable DHCP Manual Assignment.
 
-7. Save nvram dhcp_staticlist to **/opt/tmp/dhcp_staticlist.txt** and delete the DHCP Manual Assignment nvram values from dhcp_staticlist.
+7. Backup nvram dhcp_staticlist and dhcp_hostnames to /opt/tmp/ and clear nvram values.
 
-8. Display the character count of dhcp_staticlist.
+8. Display character size of dhcp_staticlist and dhcp_hostnames.
 
 ### dhcpstaticlist.sh Installation
 ````

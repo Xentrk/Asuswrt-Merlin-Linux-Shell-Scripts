@@ -10,7 +10,7 @@
 #  Helpful utility to
 #  1) Save nvram dhcp_staticlist and dhcp_hostnames to /opt/tmp. This will allow you to restore the values after performing a factory reset.
 #  2) Restore nvram dhcp_staticlist and dhcp_hostnames from /opt/tmp/.
-#  3) PPreview dhcp_staticlist and dhcp_hostnames in dnsmasq format
+#  3) Preview dhcp_staticlist and dhcp_hostnames in dnsmasq format
 #  4) Append Output DHCP Static List to /jffs/configs/dnsmasq.conf.add & Disable Manual Assignment in the WAN GUI. You will then be prompted to reboot the router to have the settings take effect.
 #  5) Disable DHCP Manual Assignment
 #  6) Enable DHCP Manual Assignment
