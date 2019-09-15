@@ -3,6 +3,7 @@
 # Script: dhcpstaticlist.sh
 # Original Author: Xentrk
 # Last Updated Date: 10-Sept-2019
+# Compatible with 384.13
 # Version 2.0.0
 #
 # Description:
