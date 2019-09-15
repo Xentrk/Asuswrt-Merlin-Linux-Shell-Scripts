@@ -54,7 +54,7 @@ The 384 code base limits the total length of dhcp_staticlist to 2999 characters.
 nvram get dhcp_staticlist | wc -m
 ````
 
-A workaround to the size limit is to manually configure dhcp static leases in dnsmasq instead of using the Web GUI. Or, do that for just a few to reduce the 2999 character limit used by the Web GUI. In Ausswrt-Merlin, add the dhcp static leases to **/jffs/configs/dnsmasq.conf.add**. The format is below.  
+The result includes one byte for the line return. So, you need to subtract 1 from the result to obtin the correct length. A workaround to the size limit is to manually configure dhcp static leases in dnsmasq instead of using the Web GUI. Or, do that for just a few to reduce the 2999 character limit used by the Web GUI. In Ausswrt-Merlin, add the dhcp static leases to **/jffs/configs/dnsmasq.conf.add**. The format is below.  
 
 ````
 dhcp-host=49:EF:0C:24:7F:16,D-Link-AP,192.168.2.10,1440
