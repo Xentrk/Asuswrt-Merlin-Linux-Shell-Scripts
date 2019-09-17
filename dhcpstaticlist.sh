@@ -2,15 +2,15 @@
 ####################################################################################################
 # Script: dhcpstaticlist.sh
 # Original Author: Xentrk
-# Last Updated Date: 10-Sept-2019
+# Last Updated Date: 17-Sept-2019
 # Compatible with 384.13
-# Version 2.0.0
+# Version 2.0.1
 #
 # Description:
 #  Helpful utility to
 #  1) Save nvram dhcp_staticlist and dhcp_hostnames to /opt/tmp. This will allow you to restore the values after performing a factory reset.
 #  2) Restore nvram dhcp_staticlist and dhcp_hostnames from /opt/tmp/.
-#  3) Preview dhcp_staticlist and dhcp_hostnames in dnsmasq format
+#  3) PPreview dhcp_staticlist and dhcp_hostnames in dnsmasq format
 #  4) Append Output DHCP Static List to /jffs/configs/dnsmasq.conf.add & Disable Manual Assignment in the WAN GUI. You will then be prompted to reboot the router to have the settings take effect.
 #  5) Disable DHCP Manual Assignment
 #  6) Enable DHCP Manual Assignment
@@ -26,6 +26,7 @@ COLOR_WHITE='\033[0m'
 COLOR_GREEN='\e[0;32m'
 DHCP_STATICLIST="/opt/tmp/dhcp_staticlist.txt"
 DHCP_HOSTNAMES="/opt/tmp/dhcp_hostnames.txt"
+MODEL=$(nvram get model)
 
 Menu_DHCP_Staticlist() {
 
@@ -192,7 +193,11 @@ Save_DHCP_Staticlist() {
     Make_Backup "$DHCP_STATICLIST"
   fi
 
-  nvram get dhcp_staticlist >"$DHCP_STATICLIST" && echo "dhcp_staticlist nvram values successfully stored in $DHCP_STATICLIST" || echo "Unknown error occurred trying to save $DHCP_STATICLIST"
+  if [ -s /jffs/nvram/dhcp_staticlist ]; then #HND Routers store dhcp_staticlist in a file
+    cp /jffs/nvram/dhcp_staticlist "$DHCP_STATICLIST" && echo "dhcp_staticlist nvram values successfully stored in $DHCP_STATICLIST" || echo "Unknown error occurred trying to save $DHCP_STATICLIST"
+  else
+    nvram get dhcp_staticlist >"$DHCP_STATICLIST" && echo "dhcp_staticlist nvram values successfully stored in $DHCP_STATICLIST" || echo "Unknown error occurred trying to save $DHCP_STATICLIST"
+  fi
 }
 
 Save_DHCP_Hostnames() {
@@ -200,40 +205,63 @@ Save_DHCP_Hostnames() {
     Make_Backup "$DHCP_HOSTNAMES"
   fi
 
-  nvram get dhcp_hostnames >"$DHCP_HOSTNAMES" && echo "dhcp_hostnames nvram values successfully stored in $DHCP_HOSTNAMES" || echo "Unknown error occurred trying to save $DHCP_HOSTNAMES"
+  if [ -s /jffs/nvram/dhcp_hostnames ]; then #HND Routers store hostnames in a file
+    cp /jffs/nvram/dhcp_hostnames "$DHCP_HOSTNAMES" && echo "dhcp_hostnames nvram values successfully stored in $DHCP_HOSTNAMES" || echo "Unknown error occurred trying to save $DHCP_HOSTNAMES"
+  else
+    nvram get dhcp_hostnames >"$DHCP_HOSTNAMES" && echo "dhcp_hostnames nvram values successfully stored in $DHCP_HOSTNAMES" || echo "Unknown error occurred trying to save $DHCP_HOSTNAMES"
+  fi
 }
 
 Restore_DHCP_Staticlist() {
-
-  nvram set dhcp_staticlist="$(cat /opt/tmp/dhcp_staticlist.txt)"
-  nvram commit
-  sleep 1
-  if [ -n "$(nvram get dhcp_staticlist)" ]; then
-    echo "dhcp_staticlist successfully restored"
+  if [ "$MODEL" = "RT-AC86U" ] || [ "$MODEL" = "RT-AX88U" ]; then #HND Routers store hostnames in a file
+    cp "$DHCP_STATICLIST" /jffs/nvram/dhcp_staticlist && echo "dhcp_staticlist nvram values successfully stored in $DHCP_STATICLIST" || echo "Unknown error occurred trying to save $DHCP_STATICLIST"
+    if [ -s "/jffs/nvram/dhcp_staticlist" ]; then
+      echo "dhcp_staticlist successfully restored"
+    else
+      echo "Unknown error occurred trying to restore dhcp_staticlist"
+    fi
   else
-    echo "Unknown error occurred trying to restore dhcp_staticlist"
+    nvram set dhcp_staticlist="$(cat /opt/tmp/dhcp_staticlist.txt)"
+    nvram commit
+    sleep 1
+    if [ -n "$(nvram get dhcp_staticlist)" ]; then
+      echo "dhcp_staticlist successfully restored"
+    else
+      echo "Unknown error occurred trying to restore dhcp_staticlist"
+    fi
   fi
 }
 
 Restore_DHCP_Hostnames() {
-
-  nvram set dhcp_hostnames="$(cat /opt/tmp/dhcp_hostnames.txt)"
-  nvram commit
-  sleep 1
-  if [ -n "$(nvram get dhcp_hostnames)" ]; then
-    echo "dhcp_hostnames successfully restored"
+  if [ "$MODEL" = "RT-AC86U" ] || [ "$MODEL" = "RT-AX88U" ]; then #HND Routers store hostnames in a file
+    cp "$DHCP_HOSTNAMES" /jffs/nvram/dhcp_hostnames
+    if [ -s /jffs/nvram/dhcp_hostnames ]; then
+      echo "dhcp_hostnames successfully restored"
+    else
+      echo "Unknown error occurred trying to restore dhcp_hostnames"
+    fi
   else
-    echo "Unknown error occurred trying to restore dhcp_hostnames"
+    nvram set dhcp_hostnames="$(cat /opt/tmp/dhcp_hostnames.txt)"
+    nvram commit
+    sleep 1
+    if [ -n "$(nvram get dhcp_hostnames)" ]; then
+      echo "dhcp_hostnames successfully restored"
+    else
+      echo "Unknown error occurred trying to restore dhcp_hostnames"
+    fi
   fi
 }
 
 Save_Dnsmasq_Format() {
 
   # Retrieve Static DHCP assignments MAC and IP Address; remove < and > symbols and separate fields with a space.
-  nvram get dhcp_staticlist | sed 's/<//;s/>/ /g;s/</ /g' >/tmp/staticlist.$$
+  if [ -s /jffs/nvram/dhcp_staticlist ]; then #HND Routers store dhcp_staticlist in a file
+    awk '{print $0}' /jffs/nvram/dhcp_staticlist | sed 's/<//;s/>/ /g;s/</ /g' >/tmp/staticlist.$$
+  else
+    nvram get dhcp_staticlist | sed 's/<//;s/>/ /g;s/</ /g' >/tmp/staticlist.$$
+  fi
 
   # Retrieve Static DHCP assignments MAC and hostname; remove < and > symbols and separate fields with a space.
-
   if [ -s /jffs/nvram/dhcp_hostnames ]; then #HND Routers store hostnames in a file
     awk '{print $0}' /jffs/nvram/dhcp_hostnames | sed 's/<//;s/>/ /g;s/</ /g' >/tmp/hostnames.$$
   else
