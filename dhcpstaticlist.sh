@@ -139,19 +139,37 @@ Menu_DHCP_Staticlist() {
       break
       ;;
     8)
-      word_count=$(nvram get dhcp_staticlist | wc -m)
-      # wc appears to count line return or extra line?
-      word_count=$((word_count - 1))
+      if [ -s /jffs/nvram/dhcp_staticlist ]; then # HND Routers store here
+        word_count=$(cat /jffs/nvram/dhcp_staticlist | wc -m)
+        # wc appears to count line return or extra line?
+        word_count=$((word_count - 1))
+
+      else
+        word_count=$(nvram get dhcp_staticlist | wc -m)
+        # wc appears to count line return or extra line?
+        word_count=$((word_count - 1))
+      fi
+
       echo
       echo "The current character size of dhcp_staticlist is: $word_count"
       echo
-      word_count=$(nvram get dhcp_hostnames | wc -m)
-      # wc appears to count line return or extra line?
-      word_count=$((word_count - 1))
+
+      if [ -s /jffs/nvram/dhcp_hostnames ]; then # HND Routers store here
+        word_count=$(cat /jffs/nvram/dhcp_hostnames | wc -m)
+        # wc appears to count line return or extra line?
+        word_count=$((word_count - 1))
+      else
+        word_count=$(nvram get dhcp_hostnames | wc -m)
+        # wc appears to count line return or extra line?
+        word_count=$((word_count - 1))
+      fi
+
+      echo
       echo "The current character size of dhcp_hostnames is: $word_count"
       echo
       echo "Press enter to continue"
       read -r
+
       Menu_DHCP_Staticlist
       break
       ;;
