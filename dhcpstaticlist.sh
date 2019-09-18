@@ -276,14 +276,14 @@ Save_Dnsmasq_Format() {
   if [ -s /jffs/nvram/dhcp_staticlist ]; then #HND Routers store dhcp_staticlist in a file
     awk '{print $0}' /jffs/nvram/dhcp_staticlist | sed 's/<//;s/>undefined//;s/>/ /g;s/</ /g' >/tmp/staticlist.$$
   else
-    nvram get dhcp_staticlist | sed 's/<//;s/>/ /g;s/</ /g' >/tmp/staticlist.$$
+    nvram get dhcp_staticlist | sed 's/<//;s/>undefined//;s/>/ /g;s/</ /g' >/tmp/staticlist.$$
   fi
 
   # Retrieve Static DHCP assignments MAC and hostname; remove < and > symbols and separate fields with a space.
   if [ -s /jffs/nvram/dhcp_hostnames ]; then #HND Routers store hostnames in a file
     awk '{print $0}' /jffs/nvram/dhcp_hostnames | sed 's/<//;s/>undefined//;s/>/ /g;s/</ /g' >/tmp/hostnames.$$
   else
-    nvram get dhcp_hostnames | sed 's/<//;s/>/ /g;s/</ /g' >/tmp/hostnames.$$
+    nvram get dhcp_hostnames | sed 's/<//;s/>undefined//;s/>/ /g;s/</ /g' >/tmp/hostnames.$$
   fi
   # count number of fields in the file
   word_count_staticlist=$(head -1 /tmp/staticlist.$$ | wc -w)
