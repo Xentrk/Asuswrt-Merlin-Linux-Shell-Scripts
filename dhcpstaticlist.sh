@@ -290,7 +290,8 @@ Save_Dnsmasq_Format() {
   word_count_hostnames=$(head -1 /tmp/hostnames.$$ | wc -w)
 
   if [ "$word_count_staticlist" -ne "$word_count_hostnames" ]; then
-    echo "Unexpected error condition dhcp_staticlist and dhcp_hostnames don't match"
+    echo "Error condition! dhcp_staticlist and dhcp_hostnames word count do not match"
+    return
   else
     # count number of static leases. This is the number of loops required to get IP address and client name
     # divide word_count by 2 since client information is listed in groups of 2 fields: MAC_Address and IP_Address
