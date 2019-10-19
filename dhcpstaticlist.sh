@@ -4,7 +4,7 @@
 # Original Author: Xentrk
 # Last Updated Date: 19-October-2019
 # Compatible with 384.13
-# Version 2.0.3
+# Version 2.0.4
 #
 # Description:
 #  Helpful utility to
@@ -295,13 +295,17 @@ Save_Dnsmasq_Format() {
   word_count_hostnames=$(head -1 /tmp/hostnames.$$ | wc -w)
 
   if [ "$word_count_staticlist" -ne "$word_count_hostnames" ]; then
-    echo "Error condition! dhcp_staticlist and dhcp_hostnames word count do not match"
-    return
-  else
-    # count number of static leases. This is the number of loops required to get IP address and client name
-    # divide word_count by 2 since client information is listed in groups of 2 fields: MAC_Address and IP_Address
-    static_leases_count=$((word_count_staticlist / 2))
+    echo "Warning: dhcp_staticlist and dhcp_hostnames word count do not match"
+    echo "This indicates you have not entered hostnames for some static IP reservations"
+    echo "Best practice is to enter descriptive hostnames"
+    echo " "
+    echo "Press enter to continue"
+    read -r
   fi
+  # count number of static leases. This is the number of loops required to get IP address and client name
+  # divide word_count by 2 since client information is listed in groups of 2 fields: MAC_Address and IP_Address
+  static_leases_count=$((word_count_staticlist / 2))
+  hostname_count=$((word_count_hostnames / 2))
 
   # write MAC and IP Addresses for Static DHCP LAN Clients to /tmp/MACIP.$$
   true >/tmp/MACIP.$$
@@ -324,7 +328,7 @@ Save_Dnsmasq_Format() {
   MAC=1
   HOSTNAME=2
 
-  while [ "$loop_count" -le "$static_leases_count" ]; do
+  while [ "$loop_count" -le "$hostname_count" ]; do
     cut -d' ' -f"$MAC","$HOSTNAME" </tmp/hostnames.$$ >>"/tmp/MACHOSTNAMES.$$"
     MAC=$((MAC + 2))
     HOSTNAME=$((HOSTNAME + 2))
@@ -335,11 +339,10 @@ Save_Dnsmasq_Format() {
   awk '
     NR==FNR { k[$1]=$2; next }
     { print $0, k[$1] }
-  ' /tmp/MACIP.$$ /tmp/MACHOSTNAMES.$$ >/tmp/MACIPHOSTNAMES.$$
+  ' /tmp/MACHOSTNAMES.$$ /tmp/MACIP.$$ >/tmp/MACIPHOSTNAMES.$$
 
-  # write dhcp-host entry to /jffs/configs/dnsmasq.conf.add
-  #
-  sort -t . -k 3,3n -k 4,4n /tmp/MACIPHOSTNAMES.$$ | awk '{ print "dhcp-host="$1","$2","$3; }'
+  # write dhcp-host entry in /jffs/configs/dnsmasq.conf.add format
+  sort -t . -k 3,3n -k 4,4n /tmp/MACIPHOSTNAMES.$$ | awk '{ print "dhcp-host="$1","$2","$3""; }' | sed 's/,$//'
 
   rm -rf /tmp/staticlist.$$
   rm -rf /tmp/hostnames.$$
