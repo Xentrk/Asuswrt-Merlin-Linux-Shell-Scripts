@@ -2,9 +2,9 @@
 ####################################################################################################
 # Script: dhcpstaticlist.sh
 # Original Author: Xentrk
-# Last Updated Date: 18-Sept-2019
+# Last Updated Date: 19-October-2019
 # Compatible with 384.13
-# Version 2.0.2
+# Version 2.0.3
 #
 # Description:
 #  Helpful utility to
@@ -211,7 +211,7 @@ Save_DHCP_Staticlist() {
     Make_Backup "$DHCP_STATICLIST"
   fi
 
-  if [ -s /jffs/nvram/dhcp_staticlist ]; then #HND Routers store dhcp_staticlist in a file
+  if [ -s /jffs/nvram/dhcp_staticlist ]; then #HND Routers store dhcp_staticlist in the file /jffs/nvram/dhcp_staticlist and the nvram variable dhcp_staticlist. They are the same format so only need to save one of them
     cp /jffs/nvram/dhcp_staticlist "$DHCP_STATICLIST" && echo "dhcp_staticlist nvram values successfully stored in $DHCP_STATICLIST" || echo "Unknown error occurred trying to save $DHCP_STATICLIST"
   else
     nvram get dhcp_staticlist >"$DHCP_STATICLIST" && echo "dhcp_staticlist nvram values successfully stored in $DHCP_STATICLIST" || echo "Unknown error occurred trying to save $DHCP_STATICLIST"
@@ -230,23 +230,28 @@ Save_DHCP_Hostnames() {
   fi
 }
 
+Restore_DHCP_Staticlist_nvram() {
+  nvram set dhcp_staticlist="$(cat /opt/tmp/dhcp_staticlist.txt)"
+  nvram commit
+  sleep 1
+  if [ -n "$(nvram get dhcp_staticlist)" ]; then
+    echo "dhcp_staticlist successfully restored"
+  else
+    echo "Unknown error occurred trying to restore dhcp_staticlist"
+  fi
+}
+
 Restore_DHCP_Staticlist() {
-  if [ "$MODEL" = "RT-AC86U" ] || [ "$MODEL" = "RT-AX88U" ]; then #HND Routers store hostnames in a file
+  if [ "$MODEL" = "RT-AC86U" ] || [ "$MODEL" = "RT-AX88U" ]; then #HND Routers store hostnames in the file /jffs/nvram/dhcp_staticlist and the nvram variable dhcp_staticlist
     cp "$DHCP_STATICLIST" /jffs/nvram/dhcp_staticlist && echo "dhcp_staticlist nvram values successfully stored in $DHCP_STATICLIST" || echo "Unknown error occurred trying to save $DHCP_STATICLIST"
     if [ -s "/jffs/nvram/dhcp_staticlist" ]; then
       echo "dhcp_staticlist successfully restored"
     else
       echo "Unknown error occurred trying to restore dhcp_staticlist"
     fi
+    Restore_DHCP_Staticlist_nvram
   else
-    nvram set dhcp_staticlist="$(cat /opt/tmp/dhcp_staticlist.txt)"
-    nvram commit
-    sleep 1
-    if [ -n "$(nvram get dhcp_staticlist)" ]; then
-      echo "dhcp_staticlist successfully restored"
-    else
-      echo "Unknown error occurred trying to restore dhcp_staticlist"
-    fi
+    Restore_DHCP_Staticlist_nvram
   fi
 }
 
