@@ -2,9 +2,9 @@
 ####################################################################################################
 # Script: dhcpstaticlist.sh
 # Original Author: Xentrk
-# Last Updated Date: 19-October-2019
+# Last Updated Date: 31-December-2019
 # Compatible with 384.13
-# Version 2.0.5
+# Version 2.0.6
 #
 # Description:
 #  Helpful utility to
@@ -140,32 +140,31 @@ Menu_DHCP_Staticlist() {
       ;;
     8)
       if [ -s /jffs/nvram/dhcp_staticlist ]; then # HND Routers store here
-        word_count=$(cat /jffs/nvram/dhcp_staticlist | wc -m)
+        wc_staticlist=$(cat /jffs/nvram/dhcp_staticlist | wc -m)
         # wc appears to count line return or extra line?
-        word_count=$((word_count - 1))
-
+        wc_staticlist=$((wc_staticlist - 1))
       else
-        word_count=$(nvram get dhcp_staticlist | wc -m)
+        wc_staticlist=$(nvram get dhcp_staticlist | wc -m)
         # wc appears to count line return or extra line?
-        word_count=$((word_count - 1))
+        wc_staticlist=$((wc_staticlist - 1))
       fi
 
       echo
-      echo "The current character size of dhcp_staticlist is: $word_count"
+      echo "The current character size of dhcp_staticlist is: $wc_staticlist"
       echo
 
       if [ -s /jffs/nvram/dhcp_hostnames ]; then # HND Routers store here
-        word_count=$(cat /jffs/nvram/dhcp_hostnames | wc -m)
+        wc_hostnames=$(cat /jffs/nvram/dhcp_hostnames | wc -m)
         # wc appears to count line return or extra line?
-        word_count=$((word_count - 1))
+        wc_hostnames=$((wc_hostnames - 1))
       else
-        word_count=$(nvram get dhcp_hostnames | wc -m)
+        wc_hostnames=$(nvram get dhcp_hostnames | wc -m)
         # wc appears to count line return or extra line?
-        word_count=$((word_count - 1))
+        wc_hostnames=$((wc_hostnames - 1))
       fi
 
       echo
-      echo "The current character size of dhcp_hostnames is: $word_count"
+      echo "The current character size of dhcp_hostnames is: $wc_hostnames"
       echo
       echo "Press enter to continue"
       read -r
@@ -304,7 +303,7 @@ Save_Dnsmasq_Format() {
   fi
   # count number of static leases. This is the number of loops required to get IP address and client name
   # divide word_count by 2 since client information is listed in groups of 2 fields: MAC_Address and IP_Address
-  static_leases_count=$((word_count_staticlist / 2))
+  static_lease_count=$((word_count_staticlist / 2))
   hostname_count=$((word_count_hostnames / 2))
 
   # write MAC and IP Addresses for Static DHCP LAN Clients to /tmp/MACIP.$$
@@ -314,7 +313,7 @@ Save_Dnsmasq_Format() {
   MAC=1
   IP=2
 
-  while [ "$loop_count" -le "$static_leases_count" ]; do
+  while [ "$loop_count" -le "$static_lease_count" ]; do
     cut -d' ' -f"$MAC","$IP" </tmp/staticlist.$$ >>"/tmp/MACIP.$$"
     MAC=$((MAC + 2))
     IP=$((IP + 2))
