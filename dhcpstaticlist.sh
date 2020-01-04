@@ -2,7 +2,7 @@
 ####################################################################################################
 # Script: dhcpstaticlist.sh
 # Original Author: Xentrk
-# Last Updated Date: 31-December-2019
+# Last Updated Date: 4-January-2019
 # Compatible with 384.14
 # Version 2.0.7
 #
