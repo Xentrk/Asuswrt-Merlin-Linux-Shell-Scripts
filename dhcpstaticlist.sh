@@ -307,10 +307,11 @@ Save_Dnsmasq_Format() {
   #https://www.unix.com/shell-programming-and-scripting/161826-how-combine-2-files-into-1-file-2-columns.html
   awk 'NR==FNR{a[i++]=$0};{b[x++]=$0;};{k=x-i};END{for(j=0;j<i;) print a[j++],b[k++]}' /tmp/static_mac.$$ /tmp/static_ip.$$ >/tmp/staticlist.$$
 
+  # some users reported <undefined in nvram..need to remove
   if [ -s /jffs/nvram/dhcp_hostnames ]; then #HND Routers store hostnames in a file
-    HOSTNAME_LIST=$(awk '{print $0}' /jffs/nvram/dhcp_hostnames)
+    HOSTNAME_LIST=$(awk '{print $0}' /jffs/nvram/dhcp_hostnames | sed 's/>undefined//')
   else
-    HOSTNAME_LIST=$(nvram get dhcp_hostnames)
+    HOSTNAME_LIST=$(nvram get dhcp_hostnames | sed 's/>undefined//')
   fi
 
   # Have to parse by internal field separator since hostnames are not required
