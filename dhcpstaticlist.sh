@@ -140,7 +140,7 @@ Menu_DHCP_Staticlist() {
       ;;
     8)
       if [ -s /jffs/nvram/dhcp_staticlist ]; then # HND Routers store here
-        wc_staticlist=$(cat /jffs/nvram/dhcp_staticlist | wc -m)
+        wc_staticlist=$(wc -m /jffs/nvram/dhcp_staticlist | awk '{print $1}')
         # wc appears to count line return or extra line?
         wc_staticlist=$((wc_staticlist - 1))
       else
@@ -154,7 +154,7 @@ Menu_DHCP_Staticlist() {
       echo
 
       if [ -s /jffs/nvram/dhcp_hostnames ]; then # HND Routers store here
-        wc_hostnames=$(cat /jffs/nvram/dhcp_hostnames | wc -m)
+        wc_hostnames=$(wc -m /jffs/nvram/dhcp_hostnames | awk '{print $1}')
         # wc appears to count line return or extra line?
         wc_hostnames=$((wc_hostnames - 1))
       else
