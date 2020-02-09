@@ -6,26 +6,23 @@ Miscellaneous Linux Shell Scripts developed for Asuswrt-Merlin firmware
 profile.add adds environment variables when a user logs in over an SSH session.  This is a good place to create command line short cuts or custom commands that you can run from an SSH command line.
 
 #### Command Line Short Cuts
+Usage: ```help```
+
 ```
-logdir - cd /opt/var/log
+Command List:
 
-js - cd /jffs/scripts
-
-jc - cd /jffs/configs
-```
-
-#### Custom Commands
-```
-Clients - list active LAN Clients
-
-MatchIP - Check IP against ipset lists to see if it exists
-          Usage: MactchIP 111.222.333.444
-
-liststats - List number of entries in each IPSET list
-
-listiface - List status of WAN and OpenVPN interfaces
-
-purge_routes - Purge OpenVPN and ip rule routes
+Chk_ADNS    List OpenVPN DNS Settings
+js          cd /jffs/scripts
+jc          cd /jffs/configs
+ld          cd /opt/var/log
+routes      alternative to 'ip routes' command
+clients     List hostname, IP address and MAC address for LAN clients
+liststats   List number of entries in each IPSET list
+listiface   List status of WAN and OpenVPN interfaces
+MatchIP -   Check IP against IPSET lists to see if the IP address exists
+            Usage: MactchIP 111.222.333.444
+tree        Similar to the Unix 'tree' command to list directories
+ltree       List directories and files in each directory
 ```
 
 ### profile.add Installation

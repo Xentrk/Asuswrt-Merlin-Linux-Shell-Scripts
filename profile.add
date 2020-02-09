@@ -4,18 +4,19 @@
 #
 help() {
   echo "Command List:"
-  echo ""
+
+  echo "Chk_ADNS    List OpenVPN DNS Settings"
   echo "js          cd /jffs/scripts"
   echo "jc          cd /jffs/configs"
   echo "ld          cd /opt/var/log"
-  echo "routes      alternative to 'ip routes'"
-  echo "clients     list LAN clients"
-  echo "liststats   list IPSET lists"
-  echo "listiface   list status of interfaces"
-  echo "MatchIP     list IPSET lists containing IP address. Must pass IP address to command."
-  echo "Chk_ADNS    list status of DNS over interfaces"
-  echo "tree        list directories"
-  echo "ltree       list directories and files in each directory"
+  echo "routes      alternative to 'ip routes' command"
+  echo "clients     List hostname, IP address and MAC address for LAN clients"
+  echo "liststats   List number of entries in each IPSET list"
+  echo "listiface   List status of WAN and OpenVPN interfaces"
+  echo "MatchIP -   Check IP against IPSET lists to see if the IP address exists"
+  echo "            Usage: MactchIP 111.222.333.444
+  echo "tree        Similar to the Unix 'tree' command to list directories"
+  echo "ltree       List directories and files in each directory"
   echo ""
 }
 
