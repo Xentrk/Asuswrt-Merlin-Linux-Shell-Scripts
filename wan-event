@@ -7,15 +7,11 @@
 #
 #          wan-event      {0 | 1} {stopping | stopped | disconnected | init | connecting | connected}
 #
-# example script names: wan0-stopping, wan0-stopped, wan0-connected
 # shellcheck disable=SC2068
 Say() {
   printf '%s%s' "$$" "$@" | logger -st "($(basename "$0"))"
 }
 #========================================================================================================================================
-#Say "User wan-event running"
-
-#scr_name="$(basename $0)"
 WAN_IF=$1
 WAN_STATE=$2
 
