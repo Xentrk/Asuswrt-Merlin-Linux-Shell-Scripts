@@ -1,13 +1,15 @@
 #!/bin/sh
 # wan-event
 # Martineau wrote this script
+# See https://www.snbforums.com/threads/wan-start-script-also-run-on-wan-stop.61295/#post-542636
+#
 #   v384.15 Introduced wan-event script, (wan-start will be deprecated in a future release.)
 #
 #          wan-event      {0 | 1} {stopping | stopped | disconnected | init | connecting | connected}
 #
 # shellcheck disable=SC2068
 Say() {
-  printf '%s%s' "$$" "$@" | logger -st "($(basename $0))"
+  printf '%s%s' "$$" "$@" | logger -st "($(basename "$0"))"
 }
 #========================================================================================================================================
 #Say "User wan-event running"
@@ -22,9 +24,9 @@ SERVICE_SCRIPT_LOG="/tmp/WAN${WAN_IF}_state"
 
 # Execute and log script state
 if [ -f "/jffs/scripts/${SERVICE_SCRIPT_NAME}" ]; then
-  Say "     Script executing.. for wan-event: "$SERVICE_SCRIPT_NAME
-  echo "$SERVICE_SCRIPT_NAME" >$SERVICE_SCRIPT_LOG
-  sh /jffs/scripts/${SERVICE_SCRIPT_NAME} $*
+  Say "     Script executing.. for wan-event: $SERVICE_SCRIPT_NAME"
+  echo "$SERVICE_SCRIPT_NAME" >"$SERVICE_SCRIPT_LOG"
+  sh /jffs/scripts/"${SERVICE_SCRIPT_NAME}" "$@"
 else
   Say "     Script not defined for wan-event: $SERVICE_SCRIPT_NAME"
 fi
