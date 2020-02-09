@@ -19,7 +19,7 @@ routes      alternative to 'ip routes' command
 clients     List hostname, IP address and MAC address for LAN clients
 liststats   List number of entries in each IPSET list
 listiface   List status of WAN and OpenVPN interfaces
-MatchIP -   Check IP against IPSET lists to see if the IP address exists
+MatchIP     Check IP against IPSET lists to see if the IP address exists
             Usage: MactchIP 111.222.333.444
 tree        Similar to the Unix 'tree' command to list directories
 ltree       List directories and files in each directory
