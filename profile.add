@@ -1,84 +1,50 @@
 # /jffs/scripts/profile.add
-# 31-December-2019
-#
+
 # Directory Aliases go in this section
 #
+help() {
+  echo "Command List:"
+  echo ""
+  echo "js          cd /jffs/scripts"
+  echo "jc          cd /jffs/configs"
+  echo "ld          cd /opt/var/log"
+  echo "routes      alternative to 'ip routes'"
+  echo "clients     list LAN clients"
+  echo "liststats   list IPSET lists"
+  echo "listiface   list status of interfaces"
+  echo "MatchIP     list IPSET lists containing IP address. Must pass IP address to command."
+  echo "Chk_ADNS    list status of DNS over interfaces"
+  echo "tree        list directories"
+  echo "ltree       list directories and files in each directory"
+  echo ""
+}
+
 alias logdir='cd /opt/var/log'
 alias js='cd /jffs/scripts'
 alias jc='cd /jffs/configs'
-alias dl='cd /opt/var/log'
-
-alias sr='cd /jffs/scripts/test-project'
-alias fwmarkstats='iptables -nvL PREROUTING -t mangle --line'
+alias ld='cd /opt/var/log'
 
 ########### Martineau Hack: https://www.snbforums.com/threads/openvpn-multiple-client-default-behavior.57587/#post-504672
-routes () {
-   for ID in 254 111 112 113 114 115;do echo "Table "$ID;ip route show table $ID | grep -E "default|^128|^0";done
+routes() {
+  for ID in 254 111 112 113 114 115; do
+    echo "Table "$ID
+    ip route show table $ID | grep -E "default|^128|^0"
+  done
 }
 ###########################################
 
 # List active LAN Clients from the command line
-# Usage: Clients
-Clients () {
-    GREEN='\033[0;32m'
-    RED='\033[0;31m'
-    NC='\033[0m' # No Color
+# Usage: clients
+clients() {
+  GREEN='\033[0;32m'
+  RED='\033[0;31m'
+  NC='\033[0m' # No Color
 
-    printf '%b%-23s %-15s %-17s%b\n' "$GREEN" "Description         " "IP Address    " "MAC Address      "  "$NC"
-    arp | sed 's/(//;s/)//' | while read -r DESC IP AT MAC ETH ON IFACE
-    do
-        printf '%-23s %-15s %-17s\n' "$DESC" "$IP" "$MAC"
-    done
+  printf '%b%-23s %-15s %-17s%b\n' "$GREEN" "Description         " "IP Address    " "MAC Address      " "$NC"
+  arp | sed 's/(//;s/)//' | while read -r DESC IP AT MAC ETH ON IFACE; do
+    printf '%-23s %-15s %-17s\n' "$DESC" "$IP" "$MAC"
+  done
 }
-################################################
-Chk_Entware () {
-set -x
-    # ARGS [wait attempts] [specific_entware_utility]
-
-    READY=1                   # Assume Entware Utilities are NOT available
-    ENTWARE="opkg"
-    ENTWARE_UTILITY=                # Specific Entware utility to search for
-    MAX_TRIES=30
-
-    if [ ! -z "$2" ] && [ ! -z "$(echo "$2" | grep -E '^[0-9]+$')" ];then
-        MAX_TRIES=$2
-    fi
-
-    if [ ! -z "$1" ] && [ -z "$(echo "$1" | grep -E '^[0-9]+$')" ];then
-        ENTWARE_UTILITY=$1
-    else
-        if [ -z "$2" ] && [ ! -z "$(echo "$1" | grep -E '^[0-9]+$')" ];then
-            MAX_TRIES=$1
-        fi
-    fi
-
-   # Wait up to (default) 30 seconds to see if Entware utilities available.....
-   TRIES=0
-
-   while [ "$TRIES" -lt "$MAX_TRIES" ];do
-      if [ ! -z "$(which $ENTWARE)" ] && [ "$($ENTWARE -v | grep -o "version")" = "version" ];then
-         if [ ! -z "$ENTWARE_UTILITY" ];then            # Specific Entware utility installed?
-            if [ ! -z "$("$ENTWARE" list-installed "$ENTWARE_UTILITY")" ];then
-                READY=0                                 # Specific Entware utility found
-            else
-                # Not all Entware utilities exists as a stand-alone package e.g. 'find' is in package 'findutils'
-                if [ -d /opt ] && [ ! -z "$(find /opt/ -name "$ENTWARE_UTILITY")" ];then
-                  READY=0                               # Specific Entware utility found
-                fi
-            fi
-         else
-            READY=0                                     # Entware utilities ready
-         fi
-         break
-      fi
-      sleep 1
-      logger -st "($(basename "$0"))" $$ "Entware" "$ENTWARE_UTILITY" "not available - wait time" $((MAX_TRIES - TRIES-1))" secs left"
-      TRIES=$((TRIES + 1))
-   done
-
-   return $READY
-}
-##################################################
 
 # Check IP against ipset lists to see if it exists
 # Usage: MactchIP 111.222.333.444
@@ -89,9 +55,9 @@ MatchIP() {
     GREEN='\033[0;32m'
     RED='\033[0;31m'
     NC='\033[0m' # No Color
-#    for TestList in $( (iptables -L -t raw && iptables -L) | grep "match-set" | tr -s ' ' | cut -d' ' -f7 | tr '\n' ' '); do
+    #    for TestList in $( (iptables -L -t raw && iptables -L) | grep "match-set" | tr -s ' ' | cut -d' ' -f7 | tr '\n' ' '); do
     for SETLIST in $(ipset -L -n); do
-#    for
+      #    for
       ipset -q test $SETLIST $1 && echo -e "$1 found in ${GREEN}${SETLIST}${NC}" || echo -e "$1 not found in ${RED}${SETLIST}${NC}"
     done
   fi
@@ -100,142 +66,141 @@ MatchIP() {
 
 # List number of entries in each IPSET list
 # Usage: liststats
-liststats () {
-    GREEN='\033[0;32m'
-    RED='\033[0;31m'
-    NC='\033[0m' # No Color
-    true > /tmp/liststats
-    for SETLIST in $(ipset -L -n); do
-        printf '%s - %b%s%b\n' "$SETLIST" "$GREEN" "$(($(ipset -L "$SETLIST" | wc -l) - 8))" "$NC" >> /tmp/liststats
-    done
-    cat /tmp/liststats | sort
-    rm /tmp/liststats
+liststats() {
+  GREEN='\033[0;32m'
+  RED='\033[0;31m'
+  NC='\033[0m' # No Color
+  true >/tmp/liststats
+  for SETLIST in $(ipset -L -n); do
+    printf '%s - %b%s%b\n' "$SETLIST" "$GREEN" "$(($(ipset -L "$SETLIST" | wc -l) - 8))" "$NC" >>/tmp/liststats
+  done
+  cat /tmp/liststats | sort
+  rm /tmp/liststats
 }
 
-listiface () {
-OVPNC1_ADDR=$(nvram get vpn_client1_addr)
-OVPNC1_DESC=$(nvram get vpn_client1_desc)
-OVPNC1_STATE=$(nvram get vpn_client1_state)
-case "$OVPNC1_STATE" in
- 0) OVPNC1_STATE_DESC="Stopped" ;;
- 1) OVPNC1_STATE_DESC="Connecting" ;;
- 2) OVPNC1_STATE_DESC="Connected" ;;
- *) OVPNC1_STATE_DESC="Unknown State" ;;
-esac
+listiface() {
+  OVPNC1_ADDR=$(nvram get vpn_client1_addr)
+  OVPNC1_DESC=$(nvram get vpn_client1_desc)
+  OVPNC1_STATE=$(nvram get vpn_client1_state)
+  case "$OVPNC1_STATE" in
+  0) OVPNC1_STATE_DESC="Stopped" ;;
+  1) OVPNC1_STATE_DESC="Connecting" ;;
+  2) OVPNC1_STATE_DESC="Connected" ;;
+  *) OVPNC1_STATE_DESC="Unknown State" ;;
+  esac
 
-OVPNC2_ADDR=$(nvram get vpn_client2_addr)
-OVPNC2_DESC=$(nvram get vpn_client2_desc)
-OVPNC2_STATE=$(nvram get vpn_client2_state)
-case "$OVPNC2_STATE" in
- 0) OVPNC2_STATE_DESC="Stopped" ;;
- 1) OVPNC2_STATE_DESC="Connecting" ;;
- 2) OVPNC2_STATE_DESC="Connected" ;;
- *) OVPNC2_STATE_DESC="Unknown State" ;;
-esac
+  OVPNC2_ADDR=$(nvram get vpn_client2_addr)
+  OVPNC2_DESC=$(nvram get vpn_client2_desc)
+  OVPNC2_STATE=$(nvram get vpn_client2_state)
+  case "$OVPNC2_STATE" in
+  0) OVPNC2_STATE_DESC="Stopped" ;;
+  1) OVPNC2_STATE_DESC="Connecting" ;;
+  2) OVPNC2_STATE_DESC="Connected" ;;
+  *) OVPNC2_STATE_DESC="Unknown State" ;;
+  esac
 
-OVPNC3_ADDR=$(nvram get vpn_client3_addr)
-OVPNC3_DESC=$(nvram get vpn_client3_desc)
-OVPNC3_STATE=$(nvram get vpn_client3_state)
-case "$OVPNC3_STATE" in
- 0) OVPNC3_STATE_DESC="Stopped" ;;
- 1) OVPNC3_STATE_DESC="Connecting" ;;
- 2) OVPNC3_STATE_DESC="Connected" ;;
- *) OVPNC3_STATE_DESC="Unknown State" ;;
-esac
+  OVPNC3_ADDR=$(nvram get vpn_client3_addr)
+  OVPNC3_DESC=$(nvram get vpn_client3_desc)
+  OVPNC3_STATE=$(nvram get vpn_client3_state)
+  case "$OVPNC3_STATE" in
+  0) OVPNC3_STATE_DESC="Stopped" ;;
+  1) OVPNC3_STATE_DESC="Connecting" ;;
+  2) OVPNC3_STATE_DESC="Connected" ;;
+  *) OVPNC3_STATE_DESC="Unknown State" ;;
+  esac
 
-OVPNC4_ADDR=$(nvram get vpn_client4_addr)
-OVPNC4_DESC=$(nvram get vpn_client4_desc)
-OVPNC4_STATE=$(nvram get vpn_client4_state)
-case "$(nvram get vpn_client4_state)" in
- 0) OVPNC4_STATE_DESC="Stopped" ;;
- 1) OVPNC4_STATE_DESC="Connecting" ;;
- 2) OVPNC4_STATE_DESC="Connected" ;;
- *) OVPNC4_STATE_DESC="Unknown State" ;;
-esac
+  OVPNC4_ADDR=$(nvram get vpn_client4_addr)
+  OVPNC4_DESC=$(nvram get vpn_client4_desc)
+  OVPNC4_STATE=$(nvram get vpn_client4_state)
+  case "$(nvram get vpn_client4_state)" in
+  0) OVPNC4_STATE_DESC="Stopped" ;;
+  1) OVPNC4_STATE_DESC="Connecting" ;;
+  2) OVPNC4_STATE_DESC="Connected" ;;
+  *) OVPNC4_STATE_DESC="Unknown State" ;;
+  esac
 
-OVPNC5_ADDR=$(nvram get vpn_client5_addr)
-OVPNC5_DESC=$(nvram get vpn_client5_desc)
-OVPNC5_STATE=$(nvram get vpn_client5_state)
-case "$(nvram get vpn_client5_state)" in
- 0) OVPNC5_STATE_DESC="Stopped" ;;
- 1) OVPNC5_STATE_DESC="Connecting" ;;
- 2) OVPNC5_STATE_DESC="Connected" ;;
- *) OVPNC5_STATE_DESC="Unknown State" ;;
-esac
+  OVPNC5_ADDR=$(nvram get vpn_client5_addr)
+  OVPNC5_DESC=$(nvram get vpn_client5_desc)
+  OVPNC5_STATE=$(nvram get vpn_client5_state)
+  case "$(nvram get vpn_client5_state)" in
+  0) OVPNC5_STATE_DESC="Stopped" ;;
+  1) OVPNC5_STATE_DESC="Connecting" ;;
+  2) OVPNC5_STATE_DESC="Connected" ;;
+  *) OVPNC5_STATE_DESC="Unknown State" ;;
+  esac
 
-WAN_IP=$(nvram get wan0_ipaddr)
-WAN_GW_IFNAME=$(nvram get wan0_gw_ifname)
-WAN_IFNAME=$(nvram get wan0_ifname)
-case "$(nvram get wan0_state_t)" in
- 0) WAN0_STATE_DESC="Stopped" ;;
- 1) WAN0_STATE_DESC="Connecting" ;;
- 2) WAN0_STATE_DESC="Connected" ;;
- *) WAN0_STATE_DESC="Unknown State" ;;
-esac
-case "$(nvram get wan1_state_t)" in
- 0) WAN1_STATE_DESC="Stopped" ;;
- 1) WAN1_STATE_DESC="Connecting..." ;;
- 2) WAN1_STATE_DESC="Connected" ;;
- *) WAN1_STATE_DESC="Unknown State" ;;
-esac
+  WAN_IP=$(nvram get wan0_ipaddr)
+  WAN_GW_IFNAME=$(nvram get wan0_gw_ifname)
+  WAN_IFNAME=$(nvram get wan0_ifname)
+  case "$(nvram get wan0_state_t)" in
+  0) WAN0_STATE_DESC="Stopped" ;;
+  1) WAN0_STATE_DESC="Connecting" ;;
+  2) WAN0_STATE_DESC="Connected" ;;
+  *) WAN0_STATE_DESC="Unknown State" ;;
+  esac
+  case "$(nvram get wan1_state_t)" in
+  0) WAN1_STATE_DESC="Stopped" ;;
+  1) WAN1_STATE_DESC="Connecting..." ;;
+  2) WAN1_STATE_DESC="Connected" ;;
+  *) WAN1_STATE_DESC="Unknown State" ;;
+  esac
 
-
-printf '\n'
-printf '******************************************************************************\n'
-printf '*                            WAN Interfaces                                  *\n'
-printf '******************************************************************************\n'
-printf '%-6s %-9s %-15s %-4s %-6s\n' "WAN IF " "Status" "Address" "GW" "IFNAME"
-printf '%-6s %-9s %-15s %-4s %-6s\n' "------ " "---------" "---------------" "----" "------"
-printf '%-6s %-9s %-15s %-4s %-6s\n' "WAN0:  " ${WAN0_STATE_DESC} $(nvram get wan0_ipaddr) $(nvram get wan0_gw_ifname) $(nvram get wan0_ifname)
-printf '%-6s %-9s %-15s %-4s %-6s\n' "WAN1:  " ${WAN1_STATE_DESC} $(nvram get wan1_ipaddr) $(nvram get wan1_gw_ifname) $(nvram get wan1_ifname)
-#printf '%-11s %-9s %-7s %-9s %-7s %-4s %-11s %-4s\n' "WAN Status:" ${WAN_STATE_DESC} "WAN IP:" $(nvram get wan0_ipaddr) "WAN GW:" $(nvram get wan0_gw_ifname) "WAN IFNAME:" $(nvram get wan0_ifname)
-printf '******************************************************************************\n'
-printf '\n'
-printf '******************************************************************************\n'
-printf '*                            VPN Interfaces                                  *\n'
-printf '******************************************************************************\n'
-printf '%-7s %-13s %-35s %-24s\n' "Client" "Status" "Address" "Description"
-printf '%-7s %-13s %-35s %-24s\n' "-------" "---------" "-----------------------------------" "------------------------"
-printf '%-7s %-13s %-35s %-24s\n' "OVPNC1:" ${OVPNC1_STATE_DESC} "${OVPNC1_ADDR:-" "}" "${OVPNC1_DESC}"
-printf '%-7s %-13s %-35s %-24s\n' "OVPNC2:" ${OVPNC2_STATE_DESC} "${OVPNC2_ADDR:-" "}" "${OVPNC2_DESC}"
-printf '%-7s %-13s %-35s %-24s\n' "OVPNC3:" ${OVPNC3_STATE_DESC} "${OVPNC3_ADDR:-" "}" "${OVPNC3_DESC}"
-printf '%-7s %-13s %-35s %-24s\n' "OVPNC4:" ${OVPNC4_STATE_DESC} "${OVPNC4_ADDR:-" "}" "${OVPNC4_DESC}"
-printf '%-7s %-13s %-35s %-24s\n' "OVPNC5:" ${OVPNC5_STATE_DESC} "${OVPNC5_ADDR:-" "}" "${OVPNC5_DESC}"
-printf '\n'
+  printf '\n'
+  printf '******************************************************************************\n'
+  printf '*                            WAN Interfaces                                  *\n'
+  printf '******************************************************************************\n'
+  printf '%-6s %-9s %-15s %-4s %-6s\n' "WAN IF " "Status" "Address" "GW" "IFNAME"
+  printf '%-6s %-9s %-15s %-4s %-6s\n' "------ " "---------" "---------------" "----" "------"
+  printf '%-6s %-9s %-15s %-4s %-6s\n' "WAN0:  " ${WAN0_STATE_DESC} $(nvram get wan0_ipaddr) $(nvram get wan0_gw_ifname) $(nvram get wan0_ifname)
+  printf '%-6s %-9s %-15s %-4s %-6s\n' "WAN1:  " ${WAN1_STATE_DESC} $(nvram get wan1_ipaddr) $(nvram get wan1_gw_ifname) $(nvram get wan1_ifname)
+  #printf '%-11s %-9s %-7s %-9s %-7s %-4s %-11s %-4s\n' "WAN Status:" ${WAN_STATE_DESC} "WAN IP:" $(nvram get wan0_ipaddr) "WAN GW:" $(nvram get wan0_gw_ifname) "WAN IFNAME:" $(nvram get wan0_ifname)
+  printf '******************************************************************************\n'
+  printf '\n'
+  printf '******************************************************************************\n'
+  printf '*                            VPN Interfaces                                  *\n'
+  printf '******************************************************************************\n'
+  printf '%-7s %-13s %-35s %-24s\n' "Client" "Status" "Address" "Description"
+  printf '%-7s %-13s %-35s %-24s\n' "-------" "---------" "-----------------------------------" "------------------------"
+  printf '%-7s %-13s %-35s %-24s\n' "OVPNC1:" ${OVPNC1_STATE_DESC} "${OVPNC1_ADDR:-" "}" "${OVPNC1_DESC}"
+  printf '%-7s %-13s %-35s %-24s\n' "OVPNC2:" ${OVPNC2_STATE_DESC} "${OVPNC2_ADDR:-" "}" "${OVPNC2_DESC}"
+  printf '%-7s %-13s %-35s %-24s\n' "OVPNC3:" ${OVPNC3_STATE_DESC} "${OVPNC3_ADDR:-" "}" "${OVPNC3_DESC}"
+  printf '%-7s %-13s %-35s %-24s\n' "OVPNC4:" ${OVPNC4_STATE_DESC} "${OVPNC4_ADDR:-" "}" "${OVPNC4_DESC}"
+  printf '%-7s %-13s %-35s %-24s\n' "OVPNC5:" ${OVPNC5_STATE_DESC} "${OVPNC5_ADDR:-" "}" "${OVPNC5_DESC}"
+  printf '\n'
 }
 
-purge_routes () {
-# WAN
-    ip rule del fwmark 0x7000/0x7000 > /dev/null 2>&1
+purge_routes() {
+  # WAN
+  ip rule del fwmark 0x7000/0x7000 >/dev/null 2>&1
 
-#VPN Client 1
-    ip rule del fwmark 0x1000/0x1000 > /dev/null 2>&1
+  #VPN Client 1
+  ip rule del fwmark 0x1000/0x1000 >/dev/null 2>&1
 
-#VPN Client 2
-    ip rule del fwmark 0x2000/0x2000 > /dev/null 2>&1
+  #VPN Client 2
+  ip rule del fwmark 0x2000/0x2000 >/dev/null 2>&1
 
-#VPN Client 3
-    ip rule del fwmark 0x3000/0x3000 > /dev/null 2>&1
+  #VPN Client 3
+  ip rule del fwmark 0x3000/0x3000 >/dev/null 2>&1
 
-#VPN Client 4
-    ip rule del fwmark 0x4000/0x4000 > /dev/null 2>&1
+  #VPN Client 4
+  ip rule del fwmark 0x4000/0x4000 >/dev/null 2>&1
 
-#VPN Client 5
-    ip rule del fwmark 0x5000/0x5000 > /dev/null 2>&1
+  #VPN Client 5
+  ip rule del fwmark 0x5000/0x5000 >/dev/null 2>&1
 
-    ip route flush cache
+  ip route flush cache
 
-    ip rule | grep -E "([0-9]{1,3}[\.]){3}[0-9]{1,3}" | grep ovpnc > /tmp/temp.$$
-    ip rule | grep -E "([0-9]{1,3}[\.]){3}[0-9]{1,3}" | grep main | grep all >> /tmp/temp.$$
-    if [ -s "/tmp/temp.$$" ]; then
-        create_remove_routes_script
-    else
-        rm "/tmp/temp.$$" 2>/dev/null
-    fi
+  ip rule | grep -E "([0-9]{1,3}[\.]){3}[0-9]{1,3}" | grep ovpnc >/tmp/temp.$$
+  ip rule | grep -E "([0-9]{1,3}[\.]){3}[0-9]{1,3}" | grep main | grep all >>/tmp/temp.$$
+  if [ -s "/tmp/temp.$$" ]; then
+    create_remove_routes_script
+  else
+    rm "/tmp/temp.$$" 2>/dev/null
+  fi
 }
 
-create_remove_routes_script () {
-    awk 'BEGIN{
+create_remove_routes_script() {
+  awk 'BEGIN{
     FS=" ";
     }
     {
@@ -273,194 +238,190 @@ create_remove_routes_script () {
     }
 END{}' "/tmp/temp.$$"
 
-sed -i '1i#!/bin/sh' "/tmp/remove_routes.sh"
+  sed -i '1i#!/bin/sh' "/tmp/remove_routes.sh"
 
-# Run script to purge any existing routes and delete temp files
-sh /tmp/remove_routes.sh && rm /tmp/remove_routes.sh && rm "/tmp/temp.$$"
+  # Run script to purge any existing routes and delete temp files
+  sh /tmp/remove_routes.sh && rm /tmp/remove_routes.sh && rm "/tmp/temp.$$"
 }
 
-alias amtm='/jffs/scripts/amtm' # added by amtm
+Chk_ADNS() {
+  COLOR_RED='\033[0;31m'
+  COLOR_WHITE='\033[0m'
+  COLOR_GREEN='\e[0;32m'
 
-Chk_ADNS () {
-COLOR_RED='\033[0;31m'
-COLOR_WHITE='\033[0m'
-COLOR_GREEN='\e[0;32m'
+  listifaces() {
+    # Process OpenVPN Client 1 Information
+    OVPNC1_ADDR=$(nvram get vpn_client1_addr)
+    OVPNC1_DESC=$(nvram get vpn_client1_desc)
+    OVPNC1_STATE=$(nvram get vpn_client1_state)
+    case "$OVPNC1_STATE" in
+    0) OVPNC1_STATE_DESC="Stopped" ;;
+    1) OVPNC1_STATE_DESC="Connecting..." ;;
+    2) OVPNC1_STATE_DESC="Connected" ;;
+    *) OVPNC1_STATE_DESC="Unknown State" ;;
+    esac
+    OVPNNC1_DNS_CONFIG=$(nvram get vpn_client1_adns)
+    case "$OVPNNC1_DNS_CONFIG" in
+    0) OVPNC1_DNS_CONFIG_DESC="Disabled" ;;
+    1) OVPNC1_DNS_CONFIG_DESC="Relaxed" ;;
+    2) OVPNC1_DNS_CONFIG_DESC="Strict" ;;
+    3) OVPNC1_DNS_CONFIG_DESC="Exclusive" ;;
+    esac
 
-listifaces () {
-# Process OpenVPN Client 1 Information
-OVPNC1_ADDR=$(nvram get vpn_client1_addr)
-OVPNC1_DESC=$(nvram get vpn_client1_desc)
-OVPNC1_STATE=$(nvram get vpn_client1_state)
-case "$OVPNC1_STATE" in
- 0) OVPNC1_STATE_DESC="Stopped" ;;
- 1) OVPNC1_STATE_DESC="Connecting..." ;;
- 2) OVPNC1_STATE_DESC="Connected" ;;
- *) OVPNC1_STATE_DESC="Unknown State" ;;
-esac
-OVPNNC1_DNS_CONFIG=$(nvram get vpn_client1_adns)
-case "$OVPNNC1_DNS_CONFIG" in
- 0) OVPNC1_DNS_CONFIG_DESC="Disabled" ;;
- 1) OVPNC1_DNS_CONFIG_DESC="Relaxed" ;;
- 2) OVPNC1_DNS_CONFIG_DESC="Strict" ;;
- 3) OVPNC1_DNS_CONFIG_DESC="Exclusive" ;;
-esac
+    # Process OpenVPN Client 2 Information
+    OVPNC2_ADDR=$(nvram get vpn_client2_addr)
+    OVPNC2_DESC=$(nvram get vpn_client2_desc)
+    OVPNC2_STATE=$(nvram get vpn_client2_state)
 
-# Process OpenVPN Client 2 Information
-OVPNC2_ADDR=$(nvram get vpn_client2_addr)
-OVPNC2_DESC=$(nvram get vpn_client2_desc)
-OVPNC2_STATE=$(nvram get vpn_client2_state)
+    case "$OVPNC2_STATE" in
+    0) OVPNC2_STATE_DESC="Stopped" ;;
+    1) OVPNC2_STATE_DESC="Connecting..." ;;
+    2) OVPNC2_STATE_DESC="Connected" ;;
+    *) OVPNC2_STATE_DESC="Unknown State" ;;
+    esac
+    OVPNNC2_DNS_CONFIG=$(nvram get vpn_client2_adns)
+    case "$OVPNNC2_DNS_CONFIG" in
+    0) OVPNC2_DNS_CONFIG_DESC="Disabled" ;;
+    1) OVPNC2_DNS_CONFIG_DESC="Relaxed" ;;
+    2) OVPNC2_DNS_CONFIG_DESC="Strict" ;;
+    3) OVPNC2_DNS_CONFIG_DESC="Exclusive" ;;
+    esac
 
-case "$OVPNC2_STATE" in
- 0) OVPNC2_STATE_DESC="Stopped" ;;
- 1) OVPNC2_STATE_DESC="Connecting..." ;;
- 2) OVPNC2_STATE_DESC="Connected" ;;
- *) OVPNC2_STATE_DESC="Unknown State" ;;
-esac
-OVPNNC2_DNS_CONFIG=$(nvram get vpn_client2_adns)
-case "$OVPNNC2_DNS_CONFIG" in
- 0) OVPNC2_DNS_CONFIG_DESC="Disabled" ;;
- 1) OVPNC2_DNS_CONFIG_DESC="Relaxed" ;;
- 2) OVPNC2_DNS_CONFIG_DESC="Strict" ;;
- 3) OVPNC2_DNS_CONFIG_DESC="Exclusive" ;;
-esac
+    # Process OpenVPN Client 3 Information
+    OVPNC3_ADDR=$(nvram get vpn_client3_addr)
+    OVPNC3_DESC=$(nvram get vpn_client3_desc)
+    OVPNC3_STATE=$(nvram get vpn_client3_state)
 
-# Process OpenVPN Client 3 Information
-OVPNC3_ADDR=$(nvram get vpn_client3_addr)
-OVPNC3_DESC=$(nvram get vpn_client3_desc)
-OVPNC3_STATE=$(nvram get vpn_client3_state)
+    case "$OVPNC3_STATE" in
+    0) OVPNC3_STATE_DESC="Stopped" ;;
+    1) OVPNC3_STATE_DESC="Connecting..." ;;
+    2) OVPNC3_STATE_DESC="Connected" ;;
+    *) OVPNC3_STATE_DESC="Unknown State" ;;
+    esac
+    OVPNNC3_DNS_CONFIG=$(nvram get vpn_client3_adns)
+    case "$OVPNNC3_DNS_CONFIG" in
+    0) OVPNC3_DNS_CONFIG_DESC="Disabled" ;;
+    1) OVPNC3_DNS_CONFIG_DESC="Relaxed" ;;
+    2) OVPNC3_DNS_CONFIG_DESC="Strict" ;;
+    3) OVPNC3_DNS_CONFIG_DESC="Exclusive" ;;
+    esac
 
-case "$OVPNC3_STATE" in
- 0) OVPNC3_STATE_DESC="Stopped" ;;
- 1) OVPNC3_STATE_DESC="Connecting..." ;;
- 2) OVPNC3_STATE_DESC="Connected" ;;
- *) OVPNC3_STATE_DESC="Unknown State" ;;
-esac
-OVPNNC3_DNS_CONFIG=$(nvram get vpn_client3_adns)
-case "$OVPNNC3_DNS_CONFIG" in
- 0) OVPNC3_DNS_CONFIG_DESC="Disabled" ;;
- 1) OVPNC3_DNS_CONFIG_DESC="Relaxed" ;;
- 2) OVPNC3_DNS_CONFIG_DESC="Strict" ;;
- 3) OVPNC3_DNS_CONFIG_DESC="Exclusive" ;;
-esac
+    # Process OpenVPN Client 4 Information
+    OVPNC4_ADDR=$(nvram get vpn_client4_addr)
+    OVPNC4_DESC=$(nvram get vpn_client4_desc)
+    OVPNC4_STATE=$(nvram get vpn_client4_state)
+    case "$(nvram get vpn_client4_state)" in
+    0) OVPNC4_STATE_DESC="Stopped" ;;
+    1) OVPNC4_STATE_DESC="Connecting..." ;;
+    2) OVPNC4_STATE_DESC="Connected" ;;
+    *) OVPNC4_STATE_DESC="Unknown State" ;;
+    esac
+    OVPNNC4_DNS_CONFIG=$(nvram get vpn_client4_adns)
+    case "$OVPNNC4_DNS_CONFIG" in
+    0) OVPNC4_DNS_CONFIG_DESC="Disabled" ;;
+    1) OVPNC4_DNS_CONFIG_DESC="Relaxed" ;;
+    2) OVPNC4_DNS_CONFIG_DESC="Strict" ;;
+    3) OVPNC4_DNS_CONFIG_DESC="Exclusive" ;;
+    esac
 
-# Process OpenVPN Client 4 Information
-OVPNC4_ADDR=$(nvram get vpn_client4_addr)
-OVPNC4_DESC=$(nvram get vpn_client4_desc)
-OVPNC4_STATE=$(nvram get vpn_client4_state)
-case "$(nvram get vpn_client4_state)" in
- 0) OVPNC4_STATE_DESC="Stopped" ;;
- 1) OVPNC4_STATE_DESC="Connecting..." ;;
- 2) OVPNC4_STATE_DESC="Connected" ;;
- *) OVPNC4_STATE_DESC="Unknown State" ;;
-esac
-OVPNNC4_DNS_CONFIG=$(nvram get vpn_client4_adns)
-case "$OVPNNC4_DNS_CONFIG" in
- 0) OVPNC4_DNS_CONFIG_DESC="Disabled" ;;
- 1) OVPNC4_DNS_CONFIG_DESC="Relaxed" ;;
- 2) OVPNC4_DNS_CONFIG_DESC="Strict" ;;
- 3) OVPNC4_DNS_CONFIG_DESC="Exclusive" ;;
-esac
+    # Process OpenVPN Client 5 Information
+    OVPNC5_ADDR=$(nvram get vpn_client5_addr)
+    OVPNC5_DESC=$(nvram get vpn_client5_desc)
+    OVPNC5_STATE=$(nvram get vpn_client5_state)
+    case "$(nvram get vpn_client5_state)" in
+    0) OVPNC5_STATE_DESC="Stopped" ;;
+    1) OVPNC5_STATE_DESC="Connecting..." ;;
+    2) OVPNC5_STATE_DESC="Connected" ;;
+    *) OVPNC5_STATE_DESC="Unknown State" ;;
+    esac
+    OVPNNC5_DNS_CONFIG=$(nvram get vpn_client5_adns)
+    case "$OVPNNC5_DNS_CONFIG" in
+    0) OVPNC5_DNS_CONFIG_DESC="Disabled" ;;
+    1) OVPNC5_DNS_CONFIG_DESC="Relaxed" ;;
+    2) OVPNC5_DNS_CONFIG_DESC="Strict" ;;
+    3) OVPNC5_DNS_CONFIG_DESC="Exclusive" ;;
+    esac
 
-# Process OpenVPN Client 5 Information
-OVPNC5_ADDR=$(nvram get vpn_client5_addr)
-OVPNC5_DESC=$(nvram get vpn_client5_desc)
-OVPNC5_STATE=$(nvram get vpn_client5_state)
-case "$(nvram get vpn_client5_state)" in
- 0) OVPNC5_STATE_DESC="Stopped" ;;
- 1) OVPNC5_STATE_DESC="Connecting..." ;;
- 2) OVPNC5_STATE_DESC="Connected" ;;
- *) OVPNC5_STATE_DESC="Unknown State" ;;
-esac
-OVPNNC5_DNS_CONFIG=$(nvram get vpn_client5_adns)
-case "$OVPNNC5_DNS_CONFIG" in
- 0) OVPNC5_DNS_CONFIG_DESC="Disabled" ;;
- 1) OVPNC5_DNS_CONFIG_DESC="Relaxed" ;;
- 2) OVPNC5_DNS_CONFIG_DESC="Strict" ;;
- 3) OVPNC5_DNS_CONFIG_DESC="Exclusive" ;;
-esac
+    # WAN Interface Information
+    WAN_IP=$(nvram get wan0_ipaddr)
+    WAN_GW_IFNAME=$(nvram get wan0_gw_ifname)
+    WAN_IFNAME=$(nvram get wan0_ifname)
+    case "$(nvram get wan0_state_t)" in
+    0) WAN0_STATE_DESC="Stopped" ;;
+    1) WAN0_STATE_DESC="Connecting..." ;;
+    2) WAN0_STATE_DESC="Connected" ;;
+    *) WAN0_STATE_DESC="Unknown State" ;;
+    esac
+    case "$(nvram get wan1_state_t)" in
+    0) WAN1_STATE_DESC="Stopped" ;;
+    1) WAN1_STATE_DESC="Connecting..." ;;
+    2) WAN1_STATE_DESC="Connected" ;;
+    4) WAN1_STATE_DESC="Unknown State" ;;
+    esac
 
-# WAN Interface Information
-WAN_IP=$(nvram get wan0_ipaddr)
-WAN_GW_IFNAME=$(nvram get wan0_gw_ifname)
-WAN_IFNAME=$(nvram get wan0_ifname)
-case "$(nvram get wan0_state_t)" in
- 0) WAN0_STATE_DESC="Stopped" ;;
- 1) WAN0_STATE_DESC="Connecting..." ;;
- 2) WAN0_STATE_DESC="Connected" ;;
- *) WAN0_STATE_DESC="Unknown State" ;;
-esac
-case "$(nvram get wan1_state_t)" in
- 0) WAN1_STATE_DESC="Stopped" ;;
- 1) WAN1_STATE_DESC="Connecting..." ;;
- 2) WAN1_STATE_DESC="Connected" ;;
- 4) WAN1_STATE_DESC="Unknown State" ;;
-esac
+    printf '\n'
+    printf '********************************************************************************************\n'
+    printf '*                                   WAN Interfaces                                         *\n'
+    printf '********************************************************************************************\n'
+    printf '%-6s %-13s %-15s %-4s %-6s\n' "WAN IF " "Status" "Address" "GW" "IFNAME"
+    printf '%-6s %-13s %-15s %-4s %-6s\n' "------ " "-------------" "---------------" "----" "------"
+    printf '%-6s %-13s %-15s %-4s %-6s\n' "WAN0:  " "$WAN0_STATE_DESC" "$(nvram get wan0_ipaddr)" "$(nvram get wan0_gw_ifname)" "$(nvram get wan0_ifname)"
+    printf '%-6s %-13s %-15s %-4s %-6s\n' "WAN1:  " "$WAN1_STATE_DESC" "$(nvram get wan1_ipaddr)" "$(nvram get wan1_gw_ifname)" "$(nvram get wan1_ifname)"
+    printf '\n'
+    printf '********************************************************************************************\n'
+    printf '*                                   VPN Interfaces                                         *\n'
+    printf '********************************************************************************************\n'
+    printf '%+89s\n' "Accept"
+    printf '%+86s\n' "DNS"
+    printf '%-7s %-13s %-35s %-24s %-13s\n' "Client" "Status" "Address" "Description" "Configuration"
+    printf '%-7s %-13s %-35s %-24s %-13s\n' "-------" "-------------" "-----------------------------------" "------------------------" "-------------"
+    printf '%-7s %-13s %-35s %-24s %-13s\n' "OVPNC1:" "$OVPNC1_STATE_DESC" "$OVPNC1_ADDR" "$OVPNC1_DESC" "$OVPNC1_DNS_CONFIG_DESC"
+    printf '%-7s %-13s %-35s %-24s %-13s\n' "OVPNC2:" "$OVPNC2_STATE_DESC" "$OVPNC2_ADDR" "$OVPNC2_DESC" "$OVPNC2_DNS_CONFIG_DESC"
+    printf '%-7s %-13s %-35s %-24s %-13s\n' "OVPNC3:" "$OVPNC3_STATE_DESC" "$OVPNC3_ADDR" "$OVPNC3_DESC" "$OVPNC3_DNS_CONFIG_DESC"
+    printf '%-7s %-13s %-35s %-24s %-13s\n' "OVPNC4:" "$OVPNC4_STATE_DESC" "$OVPNC4_ADDR" "$OVPNC4_DESC" "$OVPNC4_DNS_CONFIG_DESC"
+    printf '%-7s %-13s %-35s %-24s %-13s\n' "OVPNC5:" "$OVPNC5_STATE_DESC" "$OVPNC5_ADDR" "$OVPNC5_DESC" "$OVPNC5_DNS_CONFIG_DESC"
+    printf '\n'
+  }
+  listifaces
 
-
-printf '\n'
-printf '********************************************************************************************\n'
-printf '*                                   WAN Interfaces                                         *\n'
-printf '********************************************************************************************\n'
-printf '%-6s %-13s %-15s %-4s %-6s\n' "WAN IF " "Status" "Address" "GW" "IFNAME"
-printf '%-6s %-13s %-15s %-4s %-6s\n' "------ " "-------------" "---------------" "----" "------"
-printf '%-6s %-13s %-15s %-4s %-6s\n' "WAN0:  " "$WAN0_STATE_DESC" "$(nvram get wan0_ipaddr)" "$(nvram get wan0_gw_ifname)" "$(nvram get wan0_ifname)"
-printf '%-6s %-13s %-15s %-4s %-6s\n' "WAN1:  " "$WAN1_STATE_DESC" "$(nvram get wan1_ipaddr)" "$(nvram get wan1_gw_ifname)" "$(nvram get wan1_ifname)"
-printf '\n'
-printf '********************************************************************************************\n'
-printf '*                                   VPN Interfaces                                         *\n'
-printf '********************************************************************************************\n'
-printf '%+89s\n' "Accept"
-printf '%+86s\n' "DNS"
-printf '%-7s %-13s %-35s %-24s %-13s\n' "Client" "Status" "Address" "Description" "Configuration"
-printf '%-7s %-13s %-35s %-24s %-13s\n' "-------" "-------------" "-----------------------------------" "------------------------" "-------------"
-printf '%-7s %-13s %-35s %-24s %-13s\n' "OVPNC1:" "$OVPNC1_STATE_DESC" "$OVPNC1_ADDR" "$OVPNC1_DESC" "$OVPNC1_DNS_CONFIG_DESC"
-printf '%-7s %-13s %-35s %-24s %-13s\n' "OVPNC2:" "$OVPNC2_STATE_DESC" "$OVPNC2_ADDR" "$OVPNC2_DESC" "$OVPNC2_DNS_CONFIG_DESC"
-printf '%-7s %-13s %-35s %-24s %-13s\n' "OVPNC3:" "$OVPNC3_STATE_DESC" "$OVPNC3_ADDR" "$OVPNC3_DESC" "$OVPNC3_DNS_CONFIG_DESC"
-printf '%-7s %-13s %-35s %-24s %-13s\n' "OVPNC4:" "$OVPNC4_STATE_DESC" "$OVPNC4_ADDR" "$OVPNC4_DESC" "$OVPNC4_DNS_CONFIG_DESC"
-printf '%-7s %-13s %-35s %-24s %-13s\n' "OVPNC5:" "$OVPNC5_STATE_DESC" "$OVPNC5_ADDR" "$OVPNC5_DESC" "$OVPNC5_DNS_CONFIG_DESC"
-printf '\n'
-}
-listifaces
-
-if [ -d "/opt/share/diversion" ]; then
+  if [ -d "/opt/share/diversion" ]; then
     printf 'Diversion installation detected\n'
     printf 'Checking for potential conflicts with active OpenVPN Clients\n'
     printf '\n'
 
-# For clients that are in a connected state, see if ADNS=3 (Exclusive)
-# If Accept DNS Cofiguration = "Exclusive", give warning message about DNSMASQ
-# being bypassed which prevents Diversion from working
+    # For clients that are in a connected state, see if ADNS=3 (Exclusive)
+    # If Accept DNS Cofiguration = "Exclusive", give warning message about DNSMASQ
+    # being bypassed which prevents Diversion from working
 
-for OPENVPN_CLIENT in 1 2 3 4 5
-    do
-        if [ "$(nvram get vpn_client${OPENVPN_CLIENT}_state)" -ne "2" ]; then
-            printf 'OpenVPN Client %s is not in a connected state. Skipping check for OpenVPN Client %s\n\n' "$OPENVPN_CLIENT" "$OPENVPN_CLIENT"
-        elif [ "$(nvram get vpn_client${OPENVPN_CLIENT}_state)" -eq "2" ] && [ "$(nvram get vpn_client${OPENVPN_CLIENT}_adns)" -eq "3" ] && [ "$(nvram get vpn_client${OPENVPN_CLIENT}_rgw)" -eq "3" ] || [ "$(nvram get vpn_client${OPENVPN_CLIENT}_rgw)" -eq "4" ]; then
-            printf 'Warning! Potential configuration conflict found with OpenVPN Client %s\n\n' "$OPENVPN_CLIENT"
-            printf '%bAccept DNS Configuration%b setting is set to %bExclusive%b\n' "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE"
-            printf 'When %bAccept DNS Configuration%b is set to %bExclusive%b and %bRedirect Internet Traffic%b is set to\n%bPolicy Rules%b or %bPolicy Rules (Strict)%b DNSMASQ is bypassed which will prevent Diversion from working\n' "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE"
-            printf '\n'
-            printf 'The work-around solution is to set %bAccept DNS Configuration%b to %bStrict%b AND\n' "$COLOR_GREEN" "$COLOR_WHITE"  "$COLOR_GREEN" "$COLOR_WHITE"
-            printf 'in the %bCustom Config Section%b add the entry: %bdhcp-option DNS dns.server.ip.address%b\n' "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE"
-            printf 'where %bdns.server.ip.address%b is a DNS server of your choice\n' "$COLOR_GREEN" "$COLOR_WHITE"
-            printf 'e.g. dhcp-option DNS 9.9.9.9\n'
-            printf 'This will result in DNS leaking.  But it will allow Diversion to work over the VPN tunnel\n'
-            printf 'To learn more about the issue, see\n'
-            printf '%bhttps://x3mtek.com/torguard-openvpn-2-4-client-setup-for-asuswrt-merlin-firmware/%b\n' "$COLOR_GREEN" "$COLOR_WHITE"
-            printf 'and navigate to the section %bDNSmasq and OpenVPN DNS%b\n\n' "$COLOR_GREEN" "$COLOR_WHITE"
-        else
-            printf 'Good news! No configuration conflicts found with OpenVPN Client %s\n\n' "$OPENVPN_CLIENT"
-        fi
+    for OPENVPN_CLIENT in 1 2 3 4 5; do
+      if [ "$(nvram get vpn_client${OPENVPN_CLIENT}_state)" -ne "2" ]; then
+        printf 'OpenVPN Client %s is not in a connected state. Skipping check for OpenVPN Client %s\n\n' "$OPENVPN_CLIENT" "$OPENVPN_CLIENT"
+      elif [ "$(nvram get vpn_client${OPENVPN_CLIENT}_state)" -eq "2" ] && [ "$(nvram get vpn_client${OPENVPN_CLIENT}_adns)" -eq "3" ] && [ "$(nvram get vpn_client${OPENVPN_CLIENT}_rgw)" -eq "3" ] || [ "$(nvram get vpn_client${OPENVPN_CLIENT}_rgw)" -eq "4" ]; then
+        printf 'Warning! Potential configuration conflict found with OpenVPN Client %s\n\n' "$OPENVPN_CLIENT"
+        printf '%bAccept DNS Configuration%b setting is set to %bExclusive%b\n' "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE"
+        printf 'When %bAccept DNS Configuration%b is set to %bExclusive%b and %bRedirect Internet Traffic%b is set to\n%bPolicy Rules%b or %bPolicy Rules (Strict)%b DNSMASQ is bypassed which will prevent Diversion from working\n' "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE"
+        printf '\n'
+        printf 'The work-around solution is to set %bAccept DNS Configuration%b to %bStrict%b AND\n' "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE"
+        printf 'in the %bCustom Config Section%b add the entry: %bdhcp-option DNS dns.server.ip.address%b\n' "$COLOR_GREEN" "$COLOR_WHITE" "$COLOR_GREEN" "$COLOR_WHITE"
+        printf 'where %bdns.server.ip.address%b is a DNS server of your choice\n' "$COLOR_GREEN" "$COLOR_WHITE"
+        printf 'e.g. dhcp-option DNS 9.9.9.9\n'
+        printf 'This will result in DNS leaking.  But it will allow Diversion to work over the VPN tunnel\n'
+        printf 'To learn more about the issue, see\n'
+        printf '%bhttps://x3mtek.com/torguard-openvpn-2-4-client-setup-for-asuswrt-merlin-firmware/%b\n' "$COLOR_GREEN" "$COLOR_WHITE"
+        printf 'and navigate to the section %bDNSmasq and OpenVPN DNS%b\n\n' "$COLOR_GREEN" "$COLOR_WHITE"
+      else
+        printf 'Good news! No configuration conflicts found with OpenVPN Client %s\n\n' "$OPENVPN_CLIENT"
+      fi
     done
-fi
+  fi
 }
 
-tree () {
+tree() {
   ls -R | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/-/+/' -e '$s/+/+/'
 
 }
 
-ltree () {
+ltree() {
 
   find . | sed -e "s/[^-][^\/]*\// |/g" -e "s/|\([^ ]\)/|-\1/"
 
