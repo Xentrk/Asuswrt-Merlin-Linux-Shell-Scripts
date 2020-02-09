@@ -5,18 +5,19 @@
 help() {
   echo "Command List:"
   echo ""
-  echo "Chk_ADNS    List OpenVPN DNS Settings"
-  echo "js          cd /jffs/scripts"
-  echo "jc          cd /jffs/configs"
-  echo "ld          cd /opt/var/log"
-  echo "routes      alternative to 'ip routes' command"
-  echo "clients     List hostname, IP address and MAC address for LAN clients"
-  echo "liststats   List number of entries in each IPSET list"
-  echo "listiface   List status of WAN and OpenVPN interfaces"
-  echo "MatchIP     Check IP against IPSET lists to see if the IP address exists"
-  echo "            Usage: MactchIP 111.222.333.444"
-  echo "tree        Similar to the Unix 'tree' command to list directories"
-  echo "ltree       List directories and files in each directory"
+  echo "Chk_ADNS      List OpenVPN DNS Settings"
+  echo "clients       List hostname, IP address and MAC address for LAN clients"
+  echo "js            cd /jffs/scripts"
+  echo "jc            cd /jffs/configs"
+  echo "ld            cd /opt/var/log"
+  echo "liststats     List number of entries in each IPSET list"
+  echo "listiface     List status of WAN and OpenVPN interfaces"
+  echo "MatchIP       Check IP against IPSET lists to see if the IP address exists"
+  echo "              Usage: MactchIP 111.222.333.444"
+  echo "purge_routes  Purge policy routing rules"
+  echo "routes        Alternative to 'ip routes' command"
+  echo "tree          Similar to the Unix 'tree' command to list directories"
+  echo "ltree         List directories and files in each directory"
   echo ""
 }
 
@@ -172,7 +173,7 @@ listiface() {
 
 purge_routes() {
   # WAN
-  ip rule del fwmark 0x7000/0x7000 >/dev/null 2>&1
+  ip rule del fwmark 0x8000/0x8000 >/dev/null 2>&1
 
   #VPN Client 1
   ip rule del fwmark 0x1000/0x1000 >/dev/null 2>&1
@@ -181,13 +182,13 @@ purge_routes() {
   ip rule del fwmark 0x2000/0x2000 >/dev/null 2>&1
 
   #VPN Client 3
-  ip rule del fwmark 0x3000/0x3000 >/dev/null 2>&1
+  ip rule del fwmark 0x7000/0x7000 >/dev/null 2>&1
 
   #VPN Client 4
   ip rule del fwmark 0x4000/0x4000 >/dev/null 2>&1
 
   #VPN Client 5
-  ip rule del fwmark 0x5000/0x5000 >/dev/null 2>&1
+  ip rule del fwmark 0x3000/0x3000 >/dev/null 2>&1
 
   ip route flush cache
 

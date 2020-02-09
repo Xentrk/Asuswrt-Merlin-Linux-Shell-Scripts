@@ -11,18 +11,19 @@ Usage: ```help```
 ```
 Command List:
 
-Chk_ADNS    List OpenVPN DNS Settings
-js          cd /jffs/scripts
-jc          cd /jffs/configs
-ld          cd /opt/var/log
-routes      alternative to 'ip routes' command
-clients     List hostname, IP address and MAC address for LAN clients
-liststats   List number of entries in each IPSET list
-listiface   List status of WAN and OpenVPN interfaces
-MatchIP     Check IP against IPSET lists to see if the IP address exists
-            Usage: MactchIP 111.222.333.444
-tree        Similar to the Unix 'tree' command to list directories
-ltree       List directories and files in each directory
+Chk_ADNS      List OpenVPN DNS Settings
+clients       List hostname, IP address and MAC address for LAN clients
+js            cd /jffs/scripts
+jc            cd /jffs/configs
+ld            cd /opt/var/log
+liststats     List number of entries in each IPSET list
+listiface     List status of WAN and OpenVPN interfaces
+MatchIP       Check IP against IPSET lists to see if the IP address exists
+              Usage: MactchIP 111.222.333.444
+purge_routes  Purge policy routing rules
+routes        Alternative to 'ip routes' command
+tree          Similar to the Unix 'tree' command to list directories
+ltree         List directories and files in each directory
 ```
 
 ### profile.add Installation
