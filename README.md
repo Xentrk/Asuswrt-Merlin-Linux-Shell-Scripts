@@ -54,7 +54,7 @@ dhcp-host=11:20:AE:5E:86:63,Security-Camera-DVR,192.168.2.200,1440
 dhcp-host=94:C9:B2:5D:F5:04,D-Link_Switch,192.168.2.201,1440
 ````
 
-1440 minues is the default lease time. Make sure to disable **Manual Assignment** of DHCP leases on the LAN page. Then, reboot the router for the settings to take effect.
+1440 minutes is the default lease time. Make sure to disable **Manual Assignment** of DHCP leases on the LAN page. Then, reboot the router for the settings to take effect.
 
 **dhcpstaticlist.sh** is a helpful utility script to manage DHCP static leases. The script displays a menu with the following functions:
 
@@ -77,4 +77,19 @@ dhcp-host=94:C9:B2:5D:F5:04,D-Link_Switch,192.168.2.201,1440
 ### dhcpstaticlist.sh Installation
 ````
 /usr/sbin/curl --retry 3 "https://raw.githubusercontent.com/Xentrk/Asuswrt-Merlin-Linux-Shell-Scripts/master/dhcpstaticlist.sh" -o "/jffs/scripts/dhcpstaticlist.sh" && chmod 755 /jffs/scripts/dhcpstaticlist.sh && sh /jffs/scripts/dhcpstaticlist.sh
+````
+# wan-event script
+Firmware version 384.15 introduced the /jffs/scripts/wan-event script.
+
+The first parameter will be the WAN unit (0 for first WAN, 1 for secondary). The second parameter will be a string describing the type of event (init, connected, etc...). A wan-event of type "connected" will be identical to when the original wan-start script was being run (wan-start should be considered deprecated and will be removed in a future release).
+
+```
+wan-event {0 | 1} {connecting | connected | disconnected | init | stopped | stopping }
+```
+Example script names:
+  wan0-stopping, wan0-stopped, wan0-connected, wan0-disconnected, wan0-init, wan0-stopped, wan0-stopping
+
+### wan-event Installation
+````
+/usr/sbin/curl --retry 3 "https://raw.githubusercontent.com/Xentrk/Asuswrt-Merlin-Linux-Shell-Scripts/master/wan-event" -o "/jffs/scripts/wan-event" && chmod 755 /jffs/scripts/wan-event
 ````
