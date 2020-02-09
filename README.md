@@ -81,13 +81,14 @@ dhcp-host=94:C9:B2:5D:F5:04,D-Link_Switch,192.168.2.201,1440
 # wan-event script
 Firmware version 384.15 introduced the /jffs/scripts/wan-event script.
 
-The first parameter will be the WAN unit (0 for first WAN, 1 for secondary). The second parameter will be a string describing the type of event (init, connected, etc...). A wan-event of type "connected" will be identical to when the original wan-start script was being run (wan-start should be considered deprecated and will be removed in a future release).
+The first parameter passed to **wan-event** will be the WAN unit (0 for first WAN, 1 for secondary). The second parameter passed to **wan-event** will be a string describing the type of event (init, connected, etc...). A wan-event of type "connected" will be identical to when the original wan-start script was being run. **wan-start** should be considered deprecated and will be removed in a future release.
 
 ```
 wan-event {0 | 1} {connecting | connected | disconnected | init | stopped | stopping }
 ```
-Example script names:
-  wan0-stopping, wan0-stopped, wan0-connected, wan0-disconnected, wan0-init, wan0-stopped, wan0-stopping
+Example script names run by wan-event:
+
+wan0-stopping, wan0-stopped, wan0-connected, wan0-disconnected, wan0-init, wan0-stopped, wan0-stopping
 
 ### wan-event Installation
 ````
