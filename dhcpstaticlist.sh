@@ -30,7 +30,7 @@ MODEL=$(nvram get model)
 
 Menu_DHCP_Staticlist() {
 
-  # clear
+  clear
 
   while true; do
     printf '\n\nUse this utility to save or restore dhcp_staticlist and dhcp_hostnames nvram values\n\n'
@@ -51,7 +51,6 @@ Menu_DHCP_Staticlist() {
     echo
     case "$option" in
     1)
-      # Check_Path
       if Check_Path; then
         Save_DHCP_Staticlist
         Save_DHCP_Hostnames
@@ -193,7 +192,6 @@ Menu_DHCP_Staticlist() {
     9)
       echo
       echo "Enter a new base path (or blank for $DEFAULT_BASE_PATH)"
-      # TODO: do validation that path was found
       read BASE_PATH
       Update_Paths
       Menu_DHCP_Staticlist
