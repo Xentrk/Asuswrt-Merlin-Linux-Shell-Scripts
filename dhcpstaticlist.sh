@@ -8,13 +8,13 @@
 #
 # Description:
 #  Helpful utility to
-#  1) Save nvram dhcp_staticlist and dhcp_hostnames to /opt/tmp. This will allow you to restore the values after performing a factory reset.
-#  2) Restore nvram dhcp_staticlist and dhcp_hostnames from /opt/tmp/.
+#  1) Save nvram dhcp_staticlist and dhcp_hostnames to /. This will allow you to restore the values after performing a factory reset.
+#  2) Restore nvram dhcp_staticlist and dhcp_hostnames from /.
 #  3) PPreview dhcp_staticlist and dhcp_hostnames in dnsmasq format
 #  4) Append Output DHCP Static List to /jffs/configs/dnsmasq.conf.add & Disable Manual Assignment in the WAN GUI. You will then be prompted to reboot the router to have the settings take effect.
 #  5) Disable DHCP Manual Assignment
 #  6) Enable DHCP Manual Assignment
-#  7) Backup nvram dhcp_staticlist and dhcp_hostnames to /opt/tmp/ and clear nvram values.
+#  7) Backup nvram dhcp_staticlist and dhcp_hostnames to / and clear nvram values.
 #  8) Display character size of dhcp_staticlist and dhcp_hostnames
 #
 ####################################################################################################
@@ -24,8 +24,8 @@
 
 COLOR_WHITE='\033[0m'
 COLOR_GREEN='\e[0;32m'
-DHCP_STATICLIST="/opt/tmp/dhcp_staticlist.txt"
-DHCP_HOSTNAMES="/opt/tmp/dhcp_hostnames.txt"
+DHCP_STATICLIST="/dhcp_staticlist.txt"
+DHCP_HOSTNAMES="/dhcp_hostnames.txt"
 MODEL=$(nvram get model)
 
 Menu_DHCP_Staticlist() {
@@ -34,13 +34,13 @@ Menu_DHCP_Staticlist() {
 
   while true; do
     printf '\n\nUse this utility to save or restore dhcp_staticlist and dhcp_hostnames nvram values\n\n'
-    printf '%b[1]%b - Save nvram dhcp_staticlist and dhcp_hostnames to /opt/tmp/\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
-    printf '%b[2]%b - Restore nvram dhcp_staticlist and dhcp_hostnames from /opt/tmp/\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
+    printf '%b[1]%b - Save nvram dhcp_staticlist and dhcp_hostnames to /\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
+    printf '%b[2]%b - Restore nvram dhcp_staticlist and dhcp_hostnames from /\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[3]%b - Preview dhcp_staticlist and dhcp_hostnames in dnsmasq format\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[4]%b - Append dhcp_staticlist and dhcp_hostnames to dnsmasq.conf.add & Disable DHCP Manual Assignment\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[5]%b - Disable DHCP Manual Assignment\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[6]%b - Enable DHCP Manual Assignment\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
-    printf '%b[7]%b - Backup nvram dhcp_staticlist and dhcp_hostnames to /opt/tmp/ and clear nvram values\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
+    printf '%b[7]%b - Backup nvram dhcp_staticlist and dhcp_hostnames to / and clear nvram values\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[8]%b - Display character size of dhcp_staticlist and dhcp_hostnames (2999 is the limit)\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[e]%b - Exit\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     echo
@@ -230,7 +230,7 @@ Save_DHCP_Hostnames() {
 }
 
 Restore_DHCP_Staticlist_nvram() {
-  nvram set dhcp_staticlist="$(cat /opt/tmp/dhcp_staticlist.txt)"
+  nvram set dhcp_staticlist="$(cat /dhcp_staticlist.txt)"
   nvram commit
   sleep 1
   if [ -n "$(nvram get dhcp_staticlist)" ]; then
@@ -263,7 +263,7 @@ Restore_DHCP_Hostnames() {
       echo "Unknown error occurred trying to restore dhcp_hostnames"
     fi
   else
-    nvram set dhcp_hostnames="$(cat /opt/tmp/dhcp_hostnames.txt)"
+    nvram set dhcp_hostnames="$(cat /dhcp_hostnames.txt)"
     nvram commit
     sleep 1
     if [ -n "$(nvram get dhcp_hostnames)" ]; then
