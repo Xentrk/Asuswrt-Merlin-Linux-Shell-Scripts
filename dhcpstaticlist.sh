@@ -25,7 +25,7 @@
 COLOR_WHITE='\033[0m'
 COLOR_GREEN='\e[0;32m'
 DHCP_STATICLIST="/jffs/dhcp_staticlist.txt"
-DHCP_HOSTNAMES="/jffs//dhcp_hostnames.txt"
+DHCP_HOSTNAMES="/jffs/dhcp_hostnames.txt"
 MODEL=$(nvram get model)
 
 Menu_DHCP_Staticlist() {
