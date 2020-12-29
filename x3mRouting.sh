@@ -1,7 +1,7 @@
 #!/bin/sh
 ####################################################################################################
 # Script: x3mRouting.sh
-# VERSION=2.3.9 Test
+# VERSION=2.3.10 yrdy
 # Author: Xentrk
 # Date: 29-December-2020
 #
@@ -91,7 +91,41 @@ COLOR_RED='\033[0;31m'
 COLOR_WHITE='\033[0m'
 COLOR_GREEN='\e[0;32m'
 
+Kill_Lock() {
+	if [ -f "/tmp/x3mRouting.lock" ] && [ -d "/proc/$(sed -n '2p' /tmp/x3mRouting.lock)" ]; then
+		logger -st "($(basename "$0"))" "[*] Killing Locked Processes ($(sed -n '1p' /tmp/x3mRouting.lock)) (pid=$(sed -n '2p' /tmp/x3mRouting.lock))"
+		logger -st "($(basename "$0"))" "[*] $(ps | awk -v pid="$(sed -n '2p' /tmp/x3mRouting.lock)" '$1 == pid')"
+		kill "$(sed -n '2p' /tmp/x3mRouting.lock)"
+		rm -rf /tmp/x3mRouting.lock
+		echo
+	fi
+}
 
+Check_Lock() {
+
+      TRIES=0
+      MAX_TRIES=120
+      
+      while [ "$TRIES" -lt "$MAX_TRIES" ]; do
+        if [ -f "/tmp/x3mRouting.lock" ]; then
+          logger -st "($(basename "$0"))" "$$ x3mRouting Lock File in use by PID $(sed -n '2p' /tmp/x3mRouting.lock) - wait time $((MAX_TRIES - TRIES - 1)) secs left"
+          sleep 3
+          TRIES=$((TRIES + 1))
+          if [ "$TRIES" -eq $((MAX_TRIES-1)) ]; then
+			      Kill_Lock
+		      fi
+        else   
+          echo "$@" > /tmp/x3mRouting.lock
+	        echo "$$" >> /tmp/x3mRouting.lock
+	        date +%s >> /tmp/x3mRouting.lock
+	        lockx3mRouting="true"
+          TRIES="$MAX_TRIES"
+        fi
+      done
+
+ # test code below
+ # exit 1
+}
 
 Chk_Entware() {
 
@@ -347,9 +381,7 @@ Check_Nat_Start_For_Entries() {
   fi
 
   if [ "$DIR" != "/opt/tmp" ]; then
-    if [ "$(echo "$@" | grep -c 'asnum=')" -gt 0 ]; then
-      SCRIPT_ENTRY="$SCRIPT_ENTRY"
-    else
+    if [ "$(echo "$@" | grep -c 'asnum=')" -eq 0 ]; then
       SCRIPT_ENTRY="$SCRIPT_ENTRY dir=$DIR"
     fi
   fi
@@ -1283,13 +1315,8 @@ Define_IFACE() {
 #==================== End of Functions  =====================================
 ## Begin ##
 logger -st "($(basename "$0"))" $$ Starting Script Execution $@
-#Check_Lock "$@"
+Check_Lock "$@"
 SCR_NAME=$(basename "$0" | sed 's/.sh//')
-
-exec 9>"/tmp/${SCR_NAME}.lock" || exit 1
-flock 9 || exit 1
-trap 'rm -f /tmp/${SCR_NAME}.lock' EXIT
-
 NAT_START="/jffs/scripts/nat-start"
 
 # Check if user specified 'dir=' parameter
