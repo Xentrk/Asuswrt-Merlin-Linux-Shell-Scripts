@@ -24,8 +24,8 @@
 
 COLOR_WHITE='\033[0m'
 COLOR_GREEN='\e[0;32m'
-DHCP_STATICLIST="/opt/tmp/dhcp_staticlist.txt"
-DHCP_HOSTNAMES="/opt/tmp/dhcp_hostnames.txt"
+COLOR_RED='\e[1;41m'
+DEFAULT_BASE_PATH="/opt/tmp"
 MODEL=$(nvram get model)
 
 Menu_DHCP_Staticlist() {
@@ -34,14 +34,16 @@ Menu_DHCP_Staticlist() {
 
   while true; do
     printf '\n\nUse this utility to save or restore dhcp_staticlist and dhcp_hostnames nvram values\n\n'
-    printf '%b[1]%b - Save nvram dhcp_staticlist and dhcp_hostnames to /opt/tmp/\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
-    printf '%b[2]%b - Restore nvram dhcp_staticlist and dhcp_hostnames from /opt/tmp/\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
+    Update_Paths
+    printf '%b[1]%b - Save nvram dhcp_staticlist and dhcp_hostnames to %s/\n' "${COLOR_GREEN}" "${COLOR_WHITE}" "$BASE_PATH"
+    printf '%b[2]%b - Restore nvram dhcp_staticlist and dhcp_hostnames from %s/\n' "${COLOR_GREEN}" "${COLOR_WHITE}" "$BASE_PATH"
     printf '%b[3]%b - Preview dhcp_staticlist and dhcp_hostnames in dnsmasq format\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[4]%b - Append dhcp_staticlist and dhcp_hostnames to dnsmasq.conf.add & Disable DHCP Manual Assignment\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[5]%b - Disable DHCP Manual Assignment\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[6]%b - Enable DHCP Manual Assignment\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[7]%b - Backup nvram dhcp_staticlist and dhcp_hostnames to /opt/tmp/ and clear nvram values\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     printf '%b[8]%b - Display character size of dhcp_staticlist and dhcp_hostnames (2999 is the limit)\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
+    printf '%b[9]%b - Change base path. Currently: %s\n' "${COLOR_GREEN}" "${COLOR_WHITE}" "$BASE_PATH"
     printf '%b[e]%b - Exit\n' "${COLOR_GREEN}" "${COLOR_WHITE}"
     echo
     printf "==> "
@@ -49,8 +51,12 @@ Menu_DHCP_Staticlist() {
     echo
     case "$option" in
     1)
-      Save_DHCP_Staticlist
-      Save_DHCP_Hostnames
+      if Check_Path; then
+        Save_DHCP_Staticlist
+        Save_DHCP_Hostnames
+      else
+        echo "No operation performed"
+      fi
       echo
       echo "Press enter to continue"
       read -r
@@ -58,8 +64,12 @@ Menu_DHCP_Staticlist() {
       break
       ;;
     2)
-      Restore_DHCP_Staticlist
-      Restore_DHCP_Hostnames
+      if Check_Path; then
+        Restore_DHCP_Staticlist
+        Restore_DHCP_Hostnames
+      else
+        echo "No operation performed"
+      fi
       echo
       echo "Press enter to continue"
       read -r
@@ -78,29 +88,32 @@ Menu_DHCP_Staticlist() {
       printf '\n' #add return in case no blank line exists at end of file
       echo " " >>/jffs/configs/dnsmasq.conf.add
       Save_Dnsmasq_Format >>/jffs/configs/dnsmasq.conf.add
-      nvram set dhcp_static_x=0
-      nvram commit
-      echo "In order for the DHCP static reservations to take affect"
-      echo "you must reboot the router. Do so now?"
-      echo
-      echo "[y] - Yes"
-      echo "[n] - No"
-      echo
-      printf "==> "
-      read -r menu_option
+      if [ $? = 0 ]; then
+        nvram set dhcp_static_x=0
+        nvram commit
+        echo "In order for the DHCP static reservations to take affect"
+        echo "you must reboot the router. Do so now?"
+        echo
+        echo "[y] - Yes"
+        echo "[n] - No"
+        echo
+        printf "==> "
+        read -r menu_option
 
-      case "$menu_option" in
-      y)
-        reboot
-        ;;
-      n)
-        break
-        ;;
-      *)
-        echo "[*] $option Isn't An Option!"
-        ;;
-      esac
-
+        case "$menu_option" in
+        y)
+          reboot
+          ;;
+        n)
+          break
+          ;;
+        *)
+          echo "[*] $option Isn't An Option!"
+          ;;
+        esac
+      else
+        Error "Unable to save. No changes made."
+      fi
       echo
       echo "Press enter to continue"
       read -r
@@ -126,12 +139,16 @@ Menu_DHCP_Staticlist() {
       break
       ;;
     7)
-      Save_DHCP_Staticlist
-      Save_DHCP_Hostnames
-      nvram unset dhcp_staticlist
-      nvram unset dhcp_hostnames
-      nvram set dhcp_static_x=0
-      nvram commit
+      if Check_Path; then
+        if Save_DHCP_Staticlist && Save_DHCP_Hostnames; then
+          nvram unset dhcp_staticlist
+          nvram unset dhcp_hostnames
+          nvram set dhcp_static_x=0
+          nvram commit
+        else
+          Error "Unable to save. No changes made"
+        fi
+      fi
       echo
       echo "Press enter to continue"
       read -r
@@ -172,6 +189,14 @@ Menu_DHCP_Staticlist() {
       Menu_DHCP_Staticlist
       break
       ;;
+    9)
+      echo
+      echo "Enter a new base path (or blank for $DEFAULT_BASE_PATH)"
+      read BASE_PATH
+      Update_Paths
+      Menu_DHCP_Staticlist
+      break
+      ;;
 
     e)
       exit 0
@@ -187,6 +212,35 @@ Menu_DHCP_Staticlist() {
   done
 }
 
+Warning() {
+  printf "%bWARNING:%b %s\n\n" "$COLOR_RED" "$COLOR_WHITE" "$1"
+}
+
+Error() {
+  printf "%bERROR:%b %s\n\n" "$COLOR_RED" "$COLOR_WHITE" "$1"
+}
+
+Check_Path() {
+  if [ ! -d "$BASE_PATH" ]; then
+    Warning "Base path '$BASE_PATH' does not exist. Please create or change base path."
+    return 1
+  fi
+  if [ ! -w "$BASE_PATH" ]; then
+    Warning "Base path '$BASE_PATH'  is not writable."
+    return 1
+  fi
+  return 0
+}
+
+Update_Paths() {
+  if [ -z "$BASE_PATH" ]; then
+    BASE_PATH=$DEFAULT_BASE_PATH
+  fi
+  Check_Path
+  DHCP_STATICLIST="$BASE_PATH/dhcp_staticlist.txt"
+  DHCP_HOSTNAMES="$BASE_PATH/dhcp_hostnames.txt"
+}
+
 Make_Backup() {
 
   FILE="$1"
@@ -195,7 +249,7 @@ Make_Backup() {
 
   if [ -s "$FILE" ]; then
     if ! mv "$FILE" "$BACKUP_FILE" >/dev/null 2>&1; then
-      printf 'Error backing up existing %b%s%b to %b%s%b\n' "$COLOR_GREEN" "$FILE" "$COLOR_WHITE" "$COLOR_GREEN" "$BACKUP_FILE" "$COLOR_WHITE"
+      Error "$( printf 'backing up existing %b%s%b to %b%s%b\n' "$COLOR_GREEN" "$FILE" "$COLOR_WHITE" "$COLOR_GREEN" "$BACKUP_FILE" "$COLOR_WHITE" )"
       printf 'Exiting %s\n' "$(basename "$0")"
       exit 1
     else
@@ -206,27 +260,32 @@ Make_Backup() {
 }
 
 Save_DHCP_Staticlist() {
+
   if [ -s "$DHCP_STATICLIST" ]; then
-    Make_Backup "$DHCP_STATICLIST"
+    Make_Backup "$DHCP_STATICLIST" || { Error "Unable to make backup"; return false; }
   fi
 
   if [ -s /jffs/nvram/dhcp_staticlist ]; then #HND Routers store dhcp_staticlist in the file /jffs/nvram/dhcp_staticlist and the nvram variable dhcp_staticlist. They are the same format so only need to save one of them
-    cp /jffs/nvram/dhcp_staticlist "$DHCP_STATICLIST" && echo "dhcp_staticlist nvram values successfully stored in $DHCP_STATICLIST" || echo "Unknown error occurred trying to save $DHCP_STATICLIST"
+    cp /jffs/nvram/dhcp_staticlist "$DHCP_STATICLIST" && echo "dhcp_staticlist nvram values successfully stored in $DHCP_STATICLIST" || { Error "Unknown error occurred trying to save $DHCP_STATICLIST"; return false; }
   else
-    nvram get dhcp_staticlist >"$DHCP_STATICLIST" && echo "dhcp_staticlist nvram values successfully stored in $DHCP_STATICLIST" || echo "Unknown error occurred trying to save $DHCP_STATICLIST"
+    nvram get dhcp_staticlist >"$DHCP_STATICLIST" && echo "dhcp_staticlist nvram values successfully stored in $DHCP_STATICLIST" || { Error "Unknown error occurred trying to save $DHCP_STATICLIST"; return false; }
   fi
+  # Success
+  true
 }
 
 Save_DHCP_Hostnames() {
   if [ -s "$DHCP_HOSTNAMES" ]; then
-    Make_Backup "$DHCP_HOSTNAMES"
+    Make_Backup "$DHCP_HOSTNAMES" || { Error "Unable to make backup"; return false; }
   fi
 
   if [ -s /jffs/nvram/dhcp_hostnames ]; then #HND Routers store hostnames in a file
-    cp /jffs/nvram/dhcp_hostnames "$DHCP_HOSTNAMES" && echo "dhcp_hostnames nvram values successfully stored in $DHCP_HOSTNAMES" || echo "Unknown error occurred trying to save $DHCP_HOSTNAMES"
+    cp /jffs/nvram/dhcp_hostnames "$DHCP_HOSTNAMES" && echo "dhcp_hostnames nvram values successfully stored in $DHCP_HOSTNAMES" || { Error "Unknown error occurred trying to save $DHCP_HOSTNAMES"; return false; }
   else
-    nvram get dhcp_hostnames >"$DHCP_HOSTNAMES" && echo "dhcp_hostnames nvram values successfully stored in $DHCP_HOSTNAMES" || echo "Unknown error occurred trying to save $DHCP_HOSTNAMES"
+    nvram get dhcp_hostnames >"$DHCP_HOSTNAMES" && echo "dhcp_hostnames nvram values successfully stored in $DHCP_HOSTNAMES" || { Error "Unknown error occurred trying to save $DHCP_HOSTNAMES"; return false; }
   fi
+  # Success
+  true
 }
 
 Restore_DHCP_Staticlist_nvram() {
@@ -236,7 +295,7 @@ Restore_DHCP_Staticlist_nvram() {
   if [ -n "$(nvram get dhcp_staticlist)" ]; then
     echo "dhcp_staticlist successfully restored"
   else
-    echo "Unknown error occurred trying to restore dhcp_staticlist"
+    Error "Unknown error occurred trying to restore dhcp_staticlist"
   fi
 }
 
@@ -246,7 +305,7 @@ Restore_DHCP_Staticlist() {
     if [ -s "/jffs/nvram/dhcp_staticlist" ]; then
       echo "dhcp_staticlist successfully restored"
     else
-      echo "Unknown error occurred trying to restore dhcp_staticlist"
+      Error "Unknown error occurred trying to restore dhcp_staticlist"
     fi
     Restore_DHCP_Staticlist_nvram
   else
@@ -260,7 +319,7 @@ Restore_DHCP_Hostnames() {
     if [ -s /jffs/nvram/dhcp_hostnames ]; then
       echo "dhcp_hostnames successfully restored"
     else
-      echo "Unknown error occurred trying to restore dhcp_hostnames"
+      Error "Unknown error occurred trying to restore dhcp_hostnames"
     fi
   else
     nvram set dhcp_hostnames="$(cat /opt/tmp/dhcp_hostnames.txt)"
@@ -269,7 +328,7 @@ Restore_DHCP_Hostnames() {
     if [ -n "$(nvram get dhcp_hostnames)" ]; then
       echo "dhcp_hostnames successfully restored"
     else
-      echo "Unknown error occurred trying to restore dhcp_hostnames"
+      Error "Unknown error occurred trying to restore dhcp_hostnames"
     fi
   fi
 }
@@ -333,5 +392,4 @@ Save_Dnsmasq_Format() {
   rm -rf /tmp/MACIPHOSTNAMES.$$
 }
 
-clear
 Menu_DHCP_Staticlist

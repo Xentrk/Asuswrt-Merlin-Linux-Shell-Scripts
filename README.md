@@ -46,7 +46,7 @@ If **Accept DNS Exclusive** is set to **Exclusive** and **Redirect Internet Traf
 
 # dhcpstaticlist.sh
 
-The 384 code base limits the total length of dhcp_staticlist to 2999 characters. As a result, the update of dhcp_staticlist will fail if it exceeds the 2999 character limit. A workaround to the size limit is to manually configure dhcp static leases in dnsmasq instead of using the Web GUI. Or, do that for just a few to reduce the 2999 character limit used by the Web GUI. In Ausswrt-Merlin, add the dhcp static leases to **/jffs/configs/dnsmasq.conf.add**. The format is below.  
+The 384 code base limits the total length of dhcp_staticlist to 2999 characters. As a result, the update of dhcp_staticlist will fail if it exceeds the 2999 character limit. A workaround to the size limit is to manually configure dhcp static leases in dnsmasq instead of using the Web GUI. Or, do that for just a few to reduce the 2999 character limit used by the Web GUI. In Ausswrt-Merlin, add the dhcp static leases to **/jffs/configs/dnsmasq.conf.add**. The format is below.
 
 ````
 dhcp-host=49:EF:0C:24:7F:16,D-Link-AP,192.168.2.10,1440
@@ -94,3 +94,8 @@ wan0-stopping, wan0-stopped, wan0-connected, wan0-disconnected, wan0-init, wan0-
 ````
 /usr/sbin/curl --retry 3 "https://raw.githubusercontent.com/Xentrk/Asuswrt-Merlin-Linux-Shell-Scripts/master/wan-event" -o "/jffs/scripts/wan-event" && chmod 755 /jffs/scripts/wan-event
 ````
+
+# Contributors
+
+* Xentrk
+* James Olsen samej71
